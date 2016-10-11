@@ -5,8 +5,6 @@ Compute the base ``10`` exponential of ``x``, in other words ``10^x``.
 """
 function exp10 end
 
-const LOG210 = 3.321928094887362347870319429489390175864831393024580612054756395815934776608624
-
 LOG102U{T}(::Type{T}) = T(0.3010299956639812)
 LOG102L{T}(::Type{T}) = T(-2.8037281277851704e-18)
 
@@ -50,9 +48,10 @@ LOG102L{T<:SmallFloatTypes}(::Type{T}) = T(-1.4320989e-8)
 
 function exp10{T}(x::T)
     # reduce
-    n = _trunc(round(T(LOG210)*x)) # truncation will give us automatic Inf handling
-    r = muladd(n, -LOG102U(T), x)
-    r = muladd(n, -LOG102L(T), r)
+    k = round(T(LOG210)*x)
+    n = _trunc(k)
+    r = muladd(k, -LOG102U(T), x)
+    r = muladd(k, -LOG102L(T), r)
 
     # compute approximation
     u = _exp10(r)

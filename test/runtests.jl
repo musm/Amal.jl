@@ -2,12 +2,12 @@ using Amal
 using Suppressor
 using Base.Test
 
-function countulp(T::Type, X::AbstractFloat,Y::AbstractFloat)
+function countulp{T}(::Type{T}, X::AbstractFloat,Y::AbstractFloat)
     x,y = T(X),T(Y)
     (isnan(x) && isnan(y)) && return zero(T)
     (isnan(x) || isnan(y)) && return T(1000)
     (isinf(x) && isinf(y)) && return (signbit(x) == signbit(y)) ? zero(T) : T(1001)
-    (x == 0 && y == 0) && return (signbit(x) == signbit(y)) ? zero(T) : T(1002)
+    (x == zero(typeof(X)) && y == zero(typeof(Y))) && return (signbit(x) == signbit(y)) ? zero(T) : T(1002)
     if isfinite(x) && isfinite(y)
         d = abs(X - Y)
         return T(d/eps(y))
@@ -19,7 +19,7 @@ function countulp(T::Type, X::AbstractFloat,Y::AbstractFloat)
 end
 countulp{T<:AbstractFloat}(x::T, y::T) = countulp(T,x,y)
 
-function cmpdenorm(T::Type, X::AbstractFloat, Y::AbstractFloat)
+function cmpdenorm{T}(::Type{T}, X::AbstractFloat, Y::AbstractFloat)
     x,y = T(X),T(Y)
     (isnan(x) && isnan(y)) && return signbit(x) == signbit(y)
     (isinf(x) && isinf(y)) && return signbit(x) == signbit(y)
@@ -57,7 +57,7 @@ function test_acc(T::Type, fun_table, xx, tol)
             rpad(" at x = "*fmtxloc, 40, " "), ": mean ", @sprintf("%g", vmean))
     end
 end
-function _test_acc(T::Type, fun_test::Function, fun_ref::Function, xx)
+function _test_acc{T}(::Type{T}, fun_test::Function, fun_ref::Function, xx)
     vmax  = zero(T)
     vmean = zero(T)
     xmax = map(zero, first(xx))

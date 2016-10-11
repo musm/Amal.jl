@@ -43,13 +43,15 @@ function exp2 end
 
 function exp2{T}(x::T)
     # reduce
-    n = _trunc(round(x)) # truncation will give us automatic Inf handling
-    r = x - n
+    k = round(x)
+    n = _trunc(k)
+    r = x - k
 
     # compute approximation
     u = _exp2(r)
     u = _ldexp(u,n)
 
+    u = ifelse(x == T(Inf), T(Inf), u)
     u = ifelse(x == T(-Inf), T(0.0), u)
     return u
 end

@@ -44,14 +44,6 @@ macro horner_oftype(x, p...)
    return Expr(:block, :($val = $(esc(x))), ex)
 end
 
-function _numeric(T,ex) # T is a Symbol
-    isa(ex, Symbol) && return ex
-    if isa(ex, Expr)
-        ex.args = map(x -> isa(x, Number) ? :($T($x)) : _numeric(T,x), ex.args)
-        return ex
-    end
-end
-
 # Similar to @horner, but split into even and odd coefficients.
 macro horner_split_oftype(x,p...)
     t1 = gensym()
@@ -85,23 +77,50 @@ macro horner_split_oftype(x,p...)
     blk
 end
 
-macro oftype(ex)
-    if is(ex.head,:(=)) && is(ex.args[1].head,:call) || is(ex.head,:function) 
-        if isa(ex.args[1].args[1],Symbol) && is(ex.args[1].args[2].head,:(::))
-            type_param = gensym("T")
-            typ = ex.args[1].args[2].args[2]
-            fun_name = ex.args[1].args[1]
-            ex.args[1].args[1] = Expr(:curly, fun_name, Expr(:<:, type_param ,typ))
-            ex.args[1].args[2].args[2] = type_param
-            ex.args[2]  = _numeric(type_param, ex.args[2])
+function _numeric(T::Symbol, ex) # ex is either a Symbol or Expr
+    isa(ex, Symbol) && return ex
+    if isa(ex, Expr)
+        if is(ex.head, :line)
+            # skip line information
+            return ex
+        else
+            ex.args = map(x -> (isa(x, Number) || (x == :Inf) || (x == :Inf32) || 
+                            (x == :Inf16)) ? :($T($x)) : _numeric(T,x), ex.args)        
+        end
+        return ex
+    end
+end
+
+# wrap signature to make the function parameteric over the float constants
+# e.g. f(x::AbstractFloat) = x + 1.0  -> f{T<:AbstractFloat}(x::T) = x + T(1.0)
+# warning Inf is not correctly parsed as a numeric type!
+macro oftype_float(ex::Expr)
+    ex_sig = ex.args[1]
+    ex_body = ex.args[2]
+    # check that ex is a function in the form  f(x::T)  or function f(x::T) end
+    if (is(ex.head,:(=)) || is(ex.head,:function)) && is(ex_sig.head,:call)
+        # if signature is in the form f(x::Type)
+        if isa(ex_sig.args[1],Symbol) && isa(ex_sig.args[2],Expr)
+            type_parameter = :T
+             # assume first type signature is the same for all other arguments
+            type_signature = ex_sig.args[2].args[2]
+            function_name = ex_sig.args[1]
+            ex_sig.args[1] = Expr(:curly, function_name, Expr(:<:, type_parameter ,type_signature))
+            for i = 2:length(ex_sig.args)  # copy new type signature to all other arguments
+                ex_sig.args[i].args[2] = type_parameter
+            end
+            ex_body  = _numeric(type_parameter, ex_body)
             return esc(ex)
-        elseif is(ex.args[1].args[1].head,:curly) && isa(ex.args[1].args[1].args[2],Expr)
-            type_param = ex.args[1].args[1].args[2].args[1]
-            ex.args[2]  = _numeric(type_param, ex.args[2])
+        # if signature is in the form f{T<:Type}(x::T)
+        elseif is(ex_sig.args[1].head,:curly) && isa(ex_sig.args[2],Expr)
+             # assume first argument type signature is the same for all other numeric type signatures arguments
+            type_parameter = ex_sig.args[2].args[2]
+            ex_body  = _numeric(type_parameter, ex_body)
             return esc(ex)
-        elseif is(ex.args[1].args[1].head,:curly) 
-            type_param = ex.args[1].args[1].args[2]
-            ex.args[2]  = _numeric(type_param, ex.args[2])
+        # if signature is in the form f{T}(x::T)
+        elseif is(ex_sig.args[1].head,:curly) 
+            type_parameter = ex_sig.args[1].args[2]
+            ex_body  = _numeric(type_parameter, ex_body)
             return esc(ex)
         end
     end

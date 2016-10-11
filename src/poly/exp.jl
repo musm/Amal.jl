@@ -18,7 +18,7 @@ function exp end
 #
 #    3. Scale back: exp(x) = 2^k * exp2(r)
 
-@inline @oftype _exp{T}(x::T) = x * x *  (0.5 + x *
+@inline @oftype_float _exp{T}(x::T) = x * x *  (0.5 + x *
     (0.166666666666666768437110590639349538832902908325195 + x *
     (4.1666666666666608842550800773096852935850620269775e-2 + x *
     (8.3333333333214711785563721946346049662679433822632e-3 + x *
@@ -30,14 +30,14 @@ function exp end
     (2.5109113077584157834518379260463349922360976052005e-8 + x *
     2.08892407222294904222385909743544413208482524169085e-9)))))))))) + x + 1
 
-@inline @oftype _exp{T<:SmallFloatTypes}(x::T) = x * x * (0.5 + x *
+@inline @oftype_float _exp{T<:SmallFloatTypes}(x::T) = x * x * (0.5 + x *
     (0.1666666567325592041015625 + x *
     (4.16664779186248779296875e-2 + x *
     (8.3335675299167633056640625e-3 + x *
     (1.39336870051920413970947265625e-3 + x *
     1.9742417498491704463958740234375e-4))))) + x + 1
 
-function exp{T}(x::T)
+@oftype_float function exp{T}(x::T)
     # reduce
     n = _trunc(round(T(LOG2E)*x)) # truncation will give us automatic Inf handling
     r = muladd(n, -LN2U(T), x)
@@ -47,6 +47,6 @@ function exp{T}(x::T)
     u = _exp(r)
     u = _ldexp(u,n)
     
-    u = ifelse(x == T(-Inf), T(0.0), u)
+    u = ifelse(x == -Inf, 0.0, u)
     return u
 end

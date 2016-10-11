@@ -17,7 +17,7 @@ function exp2 end
 #
 #    3. Scale back: exp(x) = 2^k * exp2(r)
 
-@inline @oftype _exp2{T}(x::T) = 1 + x *
+@inline @oftype_float _exp2{T}(x::T) = 1 + x *
     (0.69314718055994528622676398299518041312694549560547 + x *
     (0.240226506959100721827482516346208285540342330932617 + x *
     (5.5504108664824178265284615463315276429057121276855e-2 + x *
@@ -32,7 +32,7 @@ function exp2 end
     (2.535123436487133587891076626399781707849045986336e-11 + x *
     (-2.8554282403321170096020279832175396781540621660156e-11)))))))))))))
 
-@inline @oftype _exp2{T<:SmallFloatTypes}(x::T) = 1 + x *
+@inline @oftype_float _exp2{T<:SmallFloatTypes}(x::T) = 1 + x *
     (0.693147182464599609375 + x *
     (0.2402265071868896484375 + x *
     (5.5504046380519866943359375e-2 + x *
@@ -51,7 +51,7 @@ function exp2{T}(x::T)
     u = _exp2(r)
     u = _ldexp(u,n)
 
-    u = ifelse(x == T(Inf), T(Inf), u)
-    u = ifelse(x == T(-Inf), T(0.0), u)
+    u = ifelse(x == Inf, Inf, u)
+    u = ifelse(x == -Inf, 0.0, u)
     return u
 end

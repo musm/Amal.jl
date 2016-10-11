@@ -23,7 +23,7 @@ LOG102L{T<:SmallFloatTypes}(::Type{T}) = T(-1.4320989e-8)
 #
 #    3. Scale back: exp10(x) = 2^k * exp10(r)
 
-@inline @oftype _exp10{T}(x::T) = 1 + x *
+@inline @oftype_float _exp10{T}(x::T) = 1 + x *
     (2.30258509299404590109361379290930926799774169921875 + x *
     (2.6509490552391992146397114993305876851081848144531 + x *
     (2.03467859229311986979382709250785410404205322265625 + x *
@@ -40,13 +40,13 @@ LOG102L{T<:SmallFloatTypes}(::Type{T}) = T(-1.4320989e-8)
     (1.91957613063707931968723818805244718532776460051537e-4 + x *
     (-7.6153088869436891261699429378495551645755767822266e-2)))))))))))))))
 
-@inline @oftype _exp10{T<:SmallFloatTypes}(x::T) = 1 + x *
+@inline @oftype_float _exp10{T<:SmallFloatTypes}(x::T) = 1 + x *
     (2.302585124969482421875 + x * (2.650949001312255859375 + x *
     (2.03466701507568359375 + x * (1.171257495880126953125 + x *
     (0.54041683673858642578125 + x * (0.207421600818634033203125 + x *
     4.1938722133636474609375e-2))))))
 
-function exp10{T}(x::T)
+@oftype_float function exp10{T}(x::T)
     # reduce
     k = round(T(LOG210)*x)
     n = _trunc(k)
@@ -57,7 +57,7 @@ function exp10{T}(x::T)
     u = _exp10(r)
     u = _ldexp(u,n)
     
-    u = ifelse(x == T(Inf), T(Inf), u)
-    u = ifelse(x == T(-Inf), T(0.0), u)
+    u = ifelse(x == Inf, Inf, u)
+    u = ifelse(x == -Inf, 0.0, u)
     return u
 end

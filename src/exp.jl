@@ -47,7 +47,7 @@ MAXEXP(::Type{Float32}) = 88.72283905206835f0      # log 2^127 *(2-2^-23)
 MAXEXP(::Type{Float16}) = Float16(11.09)           # log 2^15  *(2-2^-10)
 
 MAXEXP2(::Type{Float64}) = 1024         # log2 2^1023*(2-2^-52)
-MAXEXP2(::Type{Float32}) = 128          # log2 2^127 *(2-2^-23)
+MAXEXP2(::Type{Float32}) = 128f0        # log2 2^127 *(2-2^-23)
 MAXEXP2(::Type{Float16}) = Float16(16)  # log2 2^15  *(2-2^-10)
 
 # one less than the min exponent since we can sqeeze a bit more from the exp function
@@ -56,7 +56,7 @@ MINEXP(::Type{Float32}) = -103.972077083991796412584818218726485211325f0 # log 2
 MINEXP(::Type{Float16}) = Float16(-17.32868)                             # log 2^-25
 
 MINEXP2(::Type{Float64}) = -1075        # log 2^-1075
-MINEXP2(::Type{Float32}) = -150         # log 2^-150
+MINEXP2(::Type{Float32}) = -150f0       # log 2^-150
 MINEXP2(::Type{Float16}) = Float16(-25) # log 2^-25
 
 
@@ -68,7 +68,7 @@ MINEXP2(::Type{Float16}) = Float16(-25) # log 2^-25
 # software is freely granted, provided that this notice
 # is preserved.
 # ====================================================
-@inline @oftype function _exp{T}(hi::T, lo::T)
+@inline @oftype_float function _exp{T}(hi::T, lo::T)
     r = hi - lo
     z = r*r
     p = r - z *
@@ -81,7 +81,7 @@ MINEXP2(::Type{Float16}) = Float16(-25) # log 2^-25
 end
 
 # custom coefficients
-@inline @oftype function _exp{T<:SmallFloatTypes}(hi::T, lo::T)
+@inline @oftype_float function _exp{T<:SmallFloatTypes}(hi::T, lo::T)
     r = hi - lo
     z = r*r
     p = r - z *
@@ -92,37 +92,37 @@ end
 end
 
 
-function exp{T}(x::T)
-    x > MAXEXP(T) && return T(Inf)
-    x < MINEXP(T) && return T(0.0)
+@oftype_float function exp{T}(x::T)
+    x > MAXEXP(T) && return Inf
+    x < MINEXP(T) && return 0.0
  
     # reduce: computed as r = hi - lo for extra precision
-    k = round(T(LOG2E)*x) # k is a float type
+    k = round(T(LOG2E)*x) 
+    n = _trunc(k)
     hi = muladd(k, -LN2U(T), x)
     lo = k*LN2L(T)
 
     # compute approximation
     x = _exp(hi,lo)
-    n = _trunc(k) # ldexp needs n as an int
     return _ldexp(x,n)
 end
 
 
 #  Method: we simply scale the input argument by log(2) and use the
 #  coefficients from exp(x)
-function exp2{T}(x::T)
-    x > MAXEXP2(T) && return T(Inf)
-    x < MINEXP2(T) && return T(0)
+@oftype_float function exp2{T}(x::T)
+    x > MAXEXP2(T) && return Inf
+    x < MINEXP2(T) && return 0.0
  
     # reduce: computed as r = hi - lo for extra precision
     k = round(x)
+    n = _trunc(k)
     t = x - k
     hi = t*LN2U(T)
     lo = -t*LN2L(T)
 
     # compute approximation
     x = _exp(hi,lo)
-    n = _trunc(k) # ldexp needs n as an int
     return _ldexp(x,n)
 end
 
@@ -135,12 +135,12 @@ end
  
 #     # reduce; computed as r = hi - lo for extra precision.
 #     k = round(T(LOG210)*x)
+#     n = _trunc(k)
 #     s = x*T(LN10)
 #     hi = muladd(k, -LN2U(T), s)
 #     lo = k*LN2L(T)
 
 #     # compute approximation
 #     x = _exp(hi,lo)
-#     n = _trunc(k) # ldexp needs n as an int
 #     return _ldexp(x,n)
 # end

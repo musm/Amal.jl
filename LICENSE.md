@@ -20,6 +20,7 @@ The Amal.jl package is licensed under the MIT "Expat" License:
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 > SOFTWARE.
 > 
+Contributors: https://github.com/JuliaMath/Amal.jl/graphs/contributors
 
 Amal.jl includes code that are based on the following projects, which have their own licenses:
 
@@ -28,4 +29,4 @@ Amal.jl includes code that are based on the following projects, which have their
 - [sleef](https://github.com/shibatch/sleef) [public domain] Author: Naoki Shibata
 
 - [Cephes](http://www.moshier.net/#Cephes) Copyright (C) Stephen L. Moshier.
-Permission graciously granted to distribute Julia implementations under an MIT license. 
+	Permission graciously granted to distribute Julia implementations under an MIT license. 

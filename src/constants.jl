@@ -40,9 +40,9 @@ MINEXP(::Type{Float64}) = -7.451332191019412076235e2 # log 2^-1075
 MINEXP(::Type{Float32}) = -103.97207708f0            # log 2^-150
 MINEXP(::Type{Float16}) = Float16(-17.32868)         # log 2^-25
 
-MINEXP2(::Type{Float64}) = -1075        # log 2^-1075
-MINEXP2(::Type{Float32}) = -150f0       # log 2^-150
-MINEXP2(::Type{Float16}) = Float16(-25) # log 2^-25
+MINEXP2(::Type{Float64}) = -1075        # log2 2^-1075
+MINEXP2(::Type{Float32}) = -150f0       # log2 2^-150
+MINEXP2(::Type{Float16}) = Float16(-25) # log2 2^-25
 
 MINEXP10(::Type{Float64}) = -3.23607245338779784854769e2 # log10 2^-1075
 MINEXP10(::Type{Float32}) = -45.15449934959718f0         # log10 2^-150

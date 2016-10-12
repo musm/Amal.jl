@@ -6,7 +6,7 @@ Amal, a pure Julia math library *(work in progress)*
 With support for `Float16`, `Float32`, and `Float64` types. In the future we plan support for `Float80` and `Float128` types (when they become available in Julia).
 
 
-Amal is an amalgamation of several open source math libraries, including SLEEF, Cephes, and Musl. 
+Amal is an amalgamation of several open source math libraries, including SLEEF, Cephes, and Musl and includes custom implementations combining the best of breed ideas from these libraries.
 
 
 [![Travis Build Status](https://travis-ci.org/JuliaMath/Amal.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Amal.jl)
@@ -17,7 +17,7 @@ Amal is an amalgamation of several open source math libraries, including SLEEF, 
 
 
 
-The Amal library principles include: avoid expensive branches and to avoid table look ups. As this library develops these guiding principles may adapt to meet different critera and needs of the Julia community.
+The Amal library principles include: avoid expensive branches and to avoid table look ups. As this library develops these guiding principles may adapt to meet different criteria and the needs of the Julia community.
 
 
 

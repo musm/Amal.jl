@@ -46,7 +46,7 @@ function exp2 end
 # software is freely granted, provided that this notice
 # is preserved.
 # ====================================================
-@inline @oftype_float function _exp{T}(hi::T, lo::T)
+@inline @oftype_float function _exp2{T}(hi::T, lo::T)
     r = hi - lo
     z = r*r
     p = r - z *
@@ -59,7 +59,7 @@ function exp2 end
 end
 
 # custom coefficients
-@inline @oftype_float function _exp{T<:SmallFloatTypes}(hi::T, lo::T)
+@inline @oftype_float function _exp2{T<:SmallFloatTypes}(hi::T, lo::T)
     r = hi - lo
     z = r*r
     p = r - z *
@@ -81,6 +81,6 @@ end
     lo = -t*LN2L(T)
 
     # compute approximation
-    x = _exp(hi,lo)
+    x = _exp2(hi,lo)
     return _ldexp(x,n)
 end

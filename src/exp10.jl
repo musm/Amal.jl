@@ -1,3 +1,10 @@
+"""
+    exp10(x)
+
+Compute the base ``10`` exponential of ``x``, in other words ``10^x``.
+"""
+function exp10 end
+
 # Method: see exp.jl, same idea except we do not have the hi, lo argument split in this case
 
 @inline @oftype_float function _exp10{T}(r::T)

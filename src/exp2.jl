@@ -1,9 +1,9 @@
 """
-    exp(x)
+    exp2(x)
 
-Compute the base ``e`` exponential of ``x``, in other words ``e^x``.
+Compute the base ``2`` exponential of ``x``, in other words ``2^x``.
 """
-function exp end
+function exp2 end
 
 #  Method
 #    1. Argument reduction: Reduce x to an r so that |r| <= 0.5*ln(2). Given x,
@@ -32,6 +32,11 @@ function exp end
 #               c(r) = r - (P1*r^2  + P2*r^4  + ... + P5*r^10 + ...).
 #
 #    3. Scale back: exp(x) = 2^k * exp(r)
+# 
+#    4. To obtain exp2 we simply scale the input argument by log(2) and use
+#       the coefficients from exp(x) Note: trying the same for exp10, results
+#       in a very innacurate function
+
 
 # coefficients from:
 # origin: FreeBSD /usr/src/lib/msun/src/e_exp.c */
@@ -64,15 +69,16 @@ end
     return 1.0 - ((lo - (r*p)/(2.0 - p)) - hi)
 end
 
-@oftype_float function exp{T}(x::T)
-    x > MAXEXP(T) && return Inf
-    x < MINEXP(T) && return 0.0
+@oftype_float function exp2{T}(x::T)
+    x > MAXEXP2(T) && return Inf
+    x < MINEXP2(T) && return 0.0
  
     # reduce: computed as r = hi - lo for extra precision
-    k = round(T(LOG2E)*x) 
+    k = round(x)
     n = _trunc(k)
-    hi = muladd(k, -LN2U(T), x)
-    lo = k*LN2L(T)
+    t = x - k
+    hi = t*LN2U(T)
+    lo = -t*LN2L(T)
 
     # compute approximation
     x = _exp(hi,lo)

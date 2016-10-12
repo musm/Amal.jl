@@ -1,5 +1,5 @@
 """
-    exp(x)
+    exp10(x)
 
 Compute the base ``10`` exponential of ``x``, in other words ``10^x``.
 """

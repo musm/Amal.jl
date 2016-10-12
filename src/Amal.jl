@@ -130,13 +130,15 @@ include("constants.jl")
 
 include("ldexp.jl")
 
-include("exp.jl") # exp, exp2
+include("exp.jl") # exp
 # include("poly/exp.jl") # slightly less accurate than rational approximation
 
 # include("exp10.jl")
-include("poly/exp10.jl") # slightly more accurate than rational approximation
+include("poly/exp10.jl") # slightly more accurate than rational approximation (within 1.2 ulp)
 
+include("exp2.jl")
 # include("poly/exp2.jl")
+# include("var/exp2.jl") # least accurate (within 1 ulp)
 
 
 end

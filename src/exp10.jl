@@ -21,17 +21,17 @@ function exp10 end
     return 1.0 + 2.0*r/(p - r)
 end
 
-# @inline @oftype_float function _exp10{T<:SmallFloatTypes}(r::T)
-#     z = r*r
-#     p = 0.868588924407958984375 + z * 
-#     (0.383812963962554931640625 + z * 
-#     (-5.1157988607883453369140625e-2 + z *
-#     (2.616692066192626953125 + z * 
-#     (-192.3223876953125 + z * 
-#     (6795.14453125 + z *
-#     (-92332.234375))))))
-#     return 1.0 + 2.0*r/(p - r)
-# end
+@inline @oftype_float function _exp10{T<:SmallFloatTypes}(r::T)
+    z = r*r
+    p = 0.868588924407958984375 + z * 
+    (0.383812963962554931640625 + z * 
+    (-5.1157988607883453369140625e-2 + z *
+    (2.616692066192626953125 + z * 
+    (-192.3223876953125 + z * 
+    (6795.14453125 + z *
+    (-92332.234375))))))
+    return 1.0 + 2.0*r/(p - r)
+end
 
 @oftype_float function exp10{T}(x::T)
     x > MAXEXP10(T) && return Inf

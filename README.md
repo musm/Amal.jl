@@ -1,7 +1,7 @@
 <div align="center"><img src="https://cloud.githubusercontent.com/assets/4319522/19199051/1ecffc38-8c90-11e6-8617-19208b61a07b.jpg" alt="Amal"></img> </div>
 
 
-Amal, a pure Julia math library *(a work in progress)*
+Amal, a pure Julia math library *(work in progress)*
 
 With support for `Float16`, `Float32`, and `Float64` types. In the future we plan support for `Float80` and `Float128` types (when they become available in Julia).
 
@@ -38,7 +38,7 @@ and then to restart `julia`; this will ensure you are taking full advantage of h
 
 The exported functions presently include
 ```julia
-exp, exp2
+exp, exp2, exp10
 ```
 More function to come in the near future. 
 

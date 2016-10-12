@@ -5,7 +5,7 @@ Ref = Base
     @test Test.exp(T(-Inf)) === T(0)
     @test Test.exp(T(Inf)) === T(Inf)
     @test Test.exp(T(NaN)) === T(NaN)
-    @test Test.exp(T(0)) === T(1) # for finite argument only exp(0) is exact
+    @test Test.exp(T(0)) === T(1) # exact
 
     for x in T[10000, -10000]
         @test cmpdenorm(T, Test.exp(x), Ref.exp(BigFloat(x)))
@@ -14,20 +14,20 @@ Ref = Base
     @test Test.exp2(T(-Inf)) === T(0)
     @test Test.exp2(T(Inf)) === T(Inf)
     @test Test.exp2(T(NaN)) === T(NaN)
-    @test Test.exp2(T(0)) === T(1) # for finite argument only exp(0) is exact
+    @test Test.exp2(T(0)) === T(1) # exact
 
     for x in T[10000, -10000]
         @test cmpdenorm(T, Test.exp2(x), Ref.exp2(BigFloat(x)))
     end
 
 
-    # @test Test.exp10(T(-Inf)) === T(0)
-    # @test Test.exp10(T(Inf)) === T(Inf)
-    # @test Test.exp10(T(NaN)) === T(NaN)
-    # @test Test.exp10(T(0)) === T(1) # for finite argument only exp(0) is exact
+    @test Test.exp10(T(-Inf)) === T(0)
+    @test Test.exp10(T(Inf)) === T(Inf)
+    @test Test.exp10(T(NaN)) === T(NaN)
+    @test Test.exp10(T(0)) === T(1) # exact
 
-    # for x in T[10000, -10000]
-    #     @test cmpdenorm(T, Test.exp10(x), Ref.exp10(BigFloat(x)))
-    # end
+    for x in T[10000, -10000]
+        @test cmpdenorm(T, Test.exp10(x), Ref.exp10(BigFloat(x)))
+    end
 
 end

@@ -41,22 +41,7 @@ for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :
     end
 end
 
-strip_module_name(f::Function) = last(split(string(f), '.')) # strip function name from qualified name
 
-# test the accuracy of a function where fun_table is a Dict mapping the function you want
-# to test to a reference function
-# xx is an array of values (which may be tuples for multiple arugment functions)
-# tol is the acceptable tolerance to test against
-function test_acc(T::Type, fun_table, xx, tol)
-    @testset "accuracy $(strip_module_name(fun_test))" for (fun_test, fun_ref) in fun_table
-        vmax, vmean, xmax = _test_acc(T, fun_test, fun_ref, xx)
-        @test trunc(vmax,2) <= tol
-        # print test result
-        fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5g", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
-        println(rpad(strip_module_name(fun_test), 18, " "), ": max ", @sprintf("%g", vmax),
-            rpad(" at x = "*fmtxloc, 40, " "), ": mean ", @sprintf("%g", vmean))
-    end
-end
 function _test_acc{T}(::Type{T}, fun_test::Function, fun_ref::Function, xx)
     vmax  = zero(T)
     vmean = zero(T)
@@ -78,10 +63,26 @@ function _test_acc{T}(::Type{T}, fun_test::Function, fun_ref::Function, xx)
     vmax, vmean, xmax
 end
 
+strip_module_name(f::Function) = last(split(string(f), '.')) # strip function name from qualified name
+
+# test the accuracy of a function where fun_table is a Dict mapping the function you want
+# to test to a reference function
+# xx is an array of values (which may be tuples for multiple arugment functions)
+# tol is the acceptable tolerance to test against
+function test_acc(T::Type, fun_table, xx, tol)
+    @testset "accuracy $(strip_module_name(fun_test))" for (fun_test, fun_ref) in fun_table
+        vmax, vmean, xmax = _test_acc(T, fun_test, fun_ref, xx)
+        @test trunc(vmax,2) <= tol
+        # print test result
+        fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5g", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
+        println(rpad(strip_module_name(fun_test), 18, " "), ": max ", @sprintf("%g", vmax),
+            rpad(" at x = "*fmtxloc, 40, " "), ": mean ", @sprintf("%g", vmean))
+    end
+end
 
 function runtests()
     @testset "Amal" begin
-    include("exceptional.jl")
+    # include("exceptional.jl")
     include("accuracy.jl")
     end
 end

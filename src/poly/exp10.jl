@@ -5,12 +5,6 @@ Compute the base ``10`` exponential of ``x``, in other words ``10^x``.
 """
 function exp10 end
 
-LOG102U{T}(::Type{T}) = T(0.3010299956639812)
-LOG102L{T}(::Type{T}) = T(-2.8037281277851704e-18)
-
-LOG102U{T<:SmallFloatTypes}(::Type{T}) = T(0.30103)
-LOG102L{T<:SmallFloatTypes}(::Type{T}) = T(-1.4320989e-8)
-
 #  Method
 #    1. Argument reduction: Reduce x to an r so that |r| <= 0.5*log10(2). Given x,
 #       find r and integer k such that

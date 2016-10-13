@@ -17,7 +17,7 @@ Amal is an amalgamation of several open source math libraries, including SLEEF, 
 
 
 
-The Amal library principles include: avoid expensive branches and to avoid table look ups. As this library develops these guiding principles may adapt to meet different criteria and the needs of the Julia community.
+The Amal library principles include: avoid expensive branches and to avoid table look ups. For cpu's with FMA instruction we take advantage of FMA and prefer polynomial functions to maximize performance and accuracy. Currently, only the FMA optimized functions are exported which are very accurate. The library also includes variants for non-fma systems but are not currently automatically selected. 
 
 
 
@@ -40,7 +40,7 @@ The exported functions presently include
 ```julia
 exp, exp2, exp10
 ```
-More function to come in the near future. 
+More function to come in the near future.
 
 
 

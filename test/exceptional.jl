@@ -1,4 +1,4 @@
-@testset "denormal/nonnumber $T" for T in (Float64, Float32,)
+@testset "identities and expectional cases for $T" for T in (Float64, Float32,)
 
     @test isnan(Amal.exp(T(NaN)))
     @test Amal.exp(T(-Inf)) === T(0)

@@ -1,10 +1,8 @@
 using Amal
 # using Sleef
 # using Cephes
-using BenchmarkTools
-using JLD 
-using DataStructures
-using Suppressor 
+using BenchmarkTools, JLD 
+using DataStructures, Suppressor 
 
 testlib = "Amal"
 reflib  = "Base"
@@ -36,9 +34,9 @@ inttype(::Type{Float64}) = Int64
 inttype(::Type{Float32}) = Int32
 inttype(::Type{Float16}) = Int16
 
-function run_bench(bench, test_types)
+function run_bench(bench_modules, test_types)
     suite = BenchmarkGroup()
-    for n in bench
+    for n in bench_modules
         suite[n] = BenchmarkGroup([n])
     end
 
@@ -106,7 +104,7 @@ function run_bench(bench, test_types)
 
 
 
-    for n in bench
+    for n in bench_modules
         for (f,x) in micros
             suite[n][f] = BenchmarkGroup([f])
             for T in test_types

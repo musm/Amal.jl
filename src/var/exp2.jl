@@ -21,7 +21,7 @@ function exp2 end
     return 1.0 + 2.0*r/(p - r)
 end
 
-@inline @oftype_float function _exp2{T<:SmallFloatTypes}(r::T)
+@inline @oftype_float function _exp2{T<:SmallFloat}(r::T)
     z = r*r
     p = @horner(z, 2.88539028167724609375,
     0.11550854146480560302734375,

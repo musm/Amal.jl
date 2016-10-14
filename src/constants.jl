@@ -12,15 +12,15 @@ const LN10 = 2.30258509299404568401799145468436420760110148862877297603332790096
 LN2U{T}(::Type{T}) = T(6.93145751953125e-1)
 LN2L{T}(::Type{T}) = T(1.42860682030941723212e-6)
 
-LN2U{T<:SmallFloatTypes}(::Type{T}) = T(0.693359375)
-LN2L{T<:SmallFloatTypes}(::Type{T}) = T(-2.12194440e-4)
+LN2U{T<:SmallFloat}(::Type{T}) = T(0.693359375)
+LN2L{T<:SmallFloat}(::Type{T}) = T(-2.12194440e-4)
 
 # log10(2)
 LOG102U{T}(::Type{T}) = T(3.01025390625000000000e-1)
 LOG102L{T}(::Type{T}) = T(4.60503898119521373889e-6)
 
-LOG102U{T<:SmallFloatTypes}(::Type{T}) = T(3.00781250000000000000e-1)
-LOG102L{T<:SmallFloatTypes}(::Type{T}) = T(2.48745663981195213739e-4)
+LOG102U{T<:SmallFloat}(::Type{T}) = T(3.00781250000000000000e-1)
+LOG102L{T<:SmallFloat}(::Type{T}) = T(2.48745663981195213739e-4)
 
 # max and min arguments for exponential fucntions
 MAXEXP(::Type{Float64}) = 7.09782712893383996732e2 # log 2^1023*(2-2^-52)

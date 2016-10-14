@@ -8,7 +8,7 @@ inttype(::Type{Float32}) = Int32
 inttype(::Type{Float16}) = Int16
 asint{T}(::Type{T}, x) = inttype(T)(x)
 
-@testset "Accuracy (in ulp) for $T" for T in (Float64, Float32 )
+@testset "Accuracy (in ulp) for $T" for T in (Float64, Float32, Float16)
     println("Accuracy tests for $T")
     
     xx = map(T, vcat(-10:0.0002:10, -1000:0.001:1000, -120:0.023:1000, -1000:0.02:2000))
@@ -39,16 +39,19 @@ asint{T}(::Type{T}, x) = inttype(T)(x)
 
 
     # xx = T[]
-    #     s = reinterpret(T, reinterpret(inttype(T), T(0)))
-    #     e = reinterpret(T, reinterpret(inttype(T), T(pi)/4))
+    # for i = 1:10
+    #     s = reinterpret(T, reinterpret(inttype(T), T(pi)/4 * i) - asint(T,5000))
+    #     e = reinterpret(T, reinterpret(inttype(T), T(pi)/4 * i) + asint(T,5000))
     #     d = s
     #     while d <= e 
     #         append!(xx, d)
-    #         d = reinterpret(T, reinterpret(inttype(T), d) + asint(T,10))
+    #         d = reinterpret(T, reinterpret(inttype(T), d) + asint(T,1))
     #     end
     # end
+    # xx = append!(xx, -10:0.0002:10)
     # fun_table = Dict(Amal.tan => Base.tan)
     # test_acc(T, fun_table, xx, tol)
+
 
 
 end

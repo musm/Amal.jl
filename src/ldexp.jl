@@ -13,11 +13,11 @@
 end
 
 """
-    ldexpk(a::FloatTypes, n::Int) -> Float
+    ldexpk(a::IntrinsicFloats, n::Int) -> Float
 
 Computes `a × 2^n`.
 """
-@inline function _ldexp{T<:FloatTypes}(x::T, k::Integer)
+@inline function _ldexp{T<:IntrinsicFloats}(x::T, k::Integer)
     q = k % inttype(T)
     bias = asint(T, exponent_bias(T))
     emax = asint(T, exponent_max(T))

@@ -54,7 +54,7 @@ function exp end
 end
 
 # custom coefficients
-@inline @oftype_float function _exp{T<:SmallFloatTypes}(hi::T, lo::T)
+@inline @oftype_float function _exp{T<:SmallFloat}(hi::T, lo::T)
     r = hi - lo
     z = r*r
     p = r - z * 

@@ -1,7 +1,7 @@
 """
     exp(x)
 
-Compute the base ``e`` exponential of ``x``, in other words ``e^x``.
+Compute the natural base exponential of `x`, in other words ``e^x``.
 """
 function exp end
 

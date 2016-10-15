@@ -1,7 +1,7 @@
 """
     exp2(x)
 
-Compute the base ``2`` exponential of ``x``, in other words ``2^x``.
+Compute the base `2` exponential of `x`, in other words ``2^x``.
 """
 function exp2 end
 

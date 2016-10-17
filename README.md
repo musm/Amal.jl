@@ -36,9 +36,10 @@ and then to restart `julia`; this will ensure you are taking full advantage of h
 
 The exported functions presently include
 ```julia
-exp, exp2, exp10
+exp, exp2, exp10,
+log
 ```
-More function to come in the near future.
+More functions to come in the near future.
 
 
 

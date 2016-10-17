@@ -27,21 +27,6 @@ function cmpdenorm{T}(::Type{T}, X::AbstractFloat, Y::AbstractFloat)
     return false
 end
 
-
-# overide domain checking that base adheres to
-using Base.MPFR.ROUNDING_MODE
-for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :log10, :log2, :log1p)
-    @suppress @eval begin
-        import Base.$f
-        function ($f)(x::BigFloat)
-            z = BigFloat()
-            ccall($(string(:mpfr_,f), :libmpfr), Int32, (Ptr{BigFloat}, Ptr{BigFloat}, Int32), &z, &x, ROUNDING_MODE[])
-            return z
-        end
-    end
-end
-
-
 function _test_acc{T}(::Type{T}, fun_test::Function, fun_ref::Function, xx)
     vmax  = zero(T)
     vmean = zero(T)

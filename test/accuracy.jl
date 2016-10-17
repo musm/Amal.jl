@@ -1,14 +1,14 @@
 tol = 5
 
-MRANGE(::Type{Float64}) = 10000000.0
-MRANGE(::Type{Float32}) = 10000f0
+# MRANGE(::Type{Float64}) = 10000000.0
+# MRANGE(::Type{Float32}) = 10000f0
 
-inttype(::Type{Float64}) = Int64
-inttype(::Type{Float32}) = Int32
-inttype(::Type{Float16}) = Int16
-asint{T}(::Type{T}, x) = inttype(T)(x)
+# inttype(::Type{Float64}) = Int64
+# inttype(::Type{Float32}) = Int32
+# inttype(::Type{Float16}) = Int16
+# asint{T}(::Type{T}, x) = inttype(T)(x)
 
-@testset "Accuracy (in ulp) for $T" for T in (Float64, Float32, Float16)
+@testset "Accuracy (in ulp) for $T" for T in (Float64, Float32)
     println("Accuracy tests for $T")
     
     xx = map(T, vcat(-10:0.0002:10, -1000:0.001:1000, -120:0.023:1000, -1000:0.02:2000))
@@ -24,6 +24,17 @@ asint{T}(::Type{T}, x) = inttype(T)(x)
     xx = map(T, vcat(-10:0.0002:10, -35:0.023:1000, -300:0.01:300))
     fun_table = Dict(Amal.exp10 => Base.exp10)
     test_acc(T, fun_table, xx, tol)
+
+
+    xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
+    fun_table = Dict(Amal.log => Base.log)
+    test_acc(T, fun_table, xx, tol)
+
+
+    # xx = map(T, vcat(0:0.2:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
+    # fun_table = Dict(Amal.cbrt => Base.cbrt)
+    # test_acc(T, fun_table, xx, tol)
+
 
 
     # xx = map(T, vcat(-1000:0.021:1000, -1000:0.023:1000,  -10:0.0002:10,
@@ -51,7 +62,5 @@ asint{T}(::Type{T}, x) = inttype(T)(x)
     # xx = append!(xx, -10:0.0002:10)
     # fun_table = Dict(Amal.tan => Base.tan)
     # test_acc(T, fun_table, xx, tol)
-
-
 
 end

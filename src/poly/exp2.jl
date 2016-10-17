@@ -17,8 +17,7 @@ function exp2 end
 #
 #    3. Scale back: exp2(x) = 2^k * exp2(r)
 
-@inline _exp2{T}(x::T) =
-    @horner_oftype(x, 1.0,
+@inline _exp2{T}(x::T) = @horner_oftype(x, 1.0,
     0.69314718055994528622676398299518041312694549560547,
     0.240226506959100721827482516346208285540342330932617,
     5.5504108664823380292485666132051846943795680999756e-2,
@@ -33,8 +32,7 @@ function exp2 end
     2.55208683164155542627190035541293782264671285986424e-11,
     -1.00458805873217110125204978507248889784547740688936e-11)
 
-@inline _exp2{T<:SmallFloat}(x::T) =
-    @horner_oftype(x, 1.0,
+@inline _exp2{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.0,
     0.693147182464599609375,
     0.2402265071868896484375,
     5.5504061281681060791015625e-2,
@@ -43,7 +41,10 @@ function exp2 end
     1.54563575051724910736083984375e-4,
     1.4599625501432456076145172119140625e-5)
 
-@oftype_float function exp2{T}(x::T)
+function exp2{T}(x::T)
+    x > MAXEXP2(T) && return T(Inf)
+    x < MINEXP2(T) && return T(0.0)
+    
     # reduce
     k = round(x)
     n = _trunc(k)
@@ -51,9 +52,5 @@ function exp2 end
 
     # compute approximation
     u = _exp2(r)
-    u = _ldexp(u,n)
-
-    u = ifelse(x > MAXEXP2(T), Inf, u)
-    u = ifelse(x < MINEXP2(T), 0.0, u)
-    return u
+    return _ldexp(u,n)
 end

@@ -14,12 +14,11 @@ function exp end
 #    2. Approximate exp2(r) by a polynomial on the interval [-0.5*ln(2), 0.5*ln(2)]:
 #
 #           exp(x) = 1.0 + x + polynomial(x),
-#                  = polynomial(x) + x + 1 (for better accuracy)
+#                  = polynomial(x) + x + 1 (for better accuracy if no fma)
 #
 #    3. Scale back: exp(x) = 2^k * exp(r)
 
-@inline _exp{T}(x::T) = 
-    @horner_oftype(x, 1.0, 1.0, 0.5,
+@inline _exp{T}(x::T) = @horner_oftype(x, 1.0, 1.0, 0.5,
     0.16666666666666685170383743752609007060527801513672,
     4.1666666666666692109277647659837384708225727081299e-2,
     8.3333333333159547579027659480743750464171171188354e-3,
@@ -31,15 +30,17 @@ function exp end
     2.51126540120060271373185023340013355408473216812126e-8,
     2.0923712382298872819985862227861600493028504388349e-9)
 
-@inline _exp{T<:SmallFloat}(x::T) =
-    @horner_oftype(x, 1.0, 1.0, 0.5,
+@inline _exp{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.0, 1.0, 0.5,
     0.1666666567325592041015625,
     4.1666455566883087158203125e-2,
     8.333526551723480224609375e-3,
     1.39357591979205608367919921875e-3,
     1.97799992747604846954345703125e-4)
 
-@oftype_float function exp{T}(x::T)
+function exp{T}(x::T)
+    x > MAXEXP(T) && return T(Inf)
+    x < MINEXP(T) && return T(0.0)
+    
     # reduce
     k = round(T(LOG2E)*x)
     n = _trunc(k)
@@ -48,9 +49,5 @@ function exp end
 
     # compute approximation
     u = _exp(r)
-    u = _ldexp(u,n)
-
-    u = ifelse(x > MAXEXP(T), Inf, u)
-    u = ifelse(x < MINEXP(T), 0.0, u)
-    return u
+    return _ldexp(u,n)
 end

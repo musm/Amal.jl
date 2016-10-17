@@ -61,21 +61,32 @@ end
 
 function log{T}(x::T)
     x < 0 && throw(DomainError())
-    x == 0 && return T(-Inf)
-    (isnan(x) || x == T(Inf)) && return x
 
-    # reduction
-    # no branch ver
-    # k = _ilog2(x)
-    # f = _ldexp(x,-k)
-    f, k = _frexp(x)
+    # reduction, same as frexp but with custom error handling
+    xu = reinterpret(Unsigned,x)
+    xe = xu & exponent_mask(T)
+    k = Int(xe >> significand_bits(T))
+
+    if xe == 0 # x is subnormal
+        x == 0 && return T(-Inf) # x equals +-0 
+        xs = xu & sign_mask(T)
+        xu $= xs
+        m = leading_zeros(xu) - exponent_bits(T)
+        xu <<= m
+        xu $= xs
+        k = 1 - m
+    elseif xe == exponent_mask(T) # NaN or Inf
+        return x
+    end
+
+    k -= (exponent_bias(T) - 1)
+    xu = (xu & ~exponent_mask(T)) | exponent_half(T)
+    f = reinterpret(T,xu)
+    # in other words the above are the same as:
+    # f, k = _frexp(x) # also include exception handling
 
     # scale up if smaller than sqrt(2)/2 for bettery accuracy
-    b = f < T(SQRT22)
-    # no branch ver
-    # f *= ifelse(b, 2, 1)
-    # k -= ifelse(b, 1, 0)
-    if b
+    if f < T(SQRT22)
         f *= 2
         k -= 1 
     end
@@ -85,6 +96,6 @@ function log{T}(x::T)
     s = f/(f + 2)
     s2 = s*s
     p = _log(s2)
-    hmsq = T(0.5)*f*f
-    return k*LN2U(T) - ((hmsq - (s*(hmsq + p) + k*LN2L(T))) - f)
+    hf2 = T(0.5)*f*f
+    return k*LN2U(T) - ((hf2 - (s*(hf2 + p) + k*LN2L(T))) - f)
 end

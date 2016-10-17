@@ -41,10 +41,10 @@ if FMA_FAST
     include("poly/exp2.jl")  # more accurate than rational version for FMA systems
 else
     include("exp.jl")
-    include("exp2.jl") # more accurate for non FMA
+    include("exp2.jl") # more accurate for non FMA systems
 end
 # include("exp10.jl") # try to develop a better rational approximation
-include("poly/exp10.jl") # better than rational approx for FMA and non FMA systems
+include("poly/exp10.jl") # better than rational version for FMA and non FMA systems
 
 include("log.jl")
 

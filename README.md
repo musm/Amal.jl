@@ -3,7 +3,7 @@
 
 Amal, a pure Julia math library *(work in progress)*
 
-With support for `Float16`, `Float32`, and `Float64` types. In the future we plan support for `Float80` and `Float128` types (when they become available in Julia).
+With support for `Float16`, `Float32`, and `Float64` types. In the future we plan support for `Float128` (when available in Julia).
 
 [![Travis Build Status](https://travis-ci.org/JuliaMath/Amal.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Amal.jl)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/a0n8hfkv9fi59ukc/branch/master?svg=true)](https://ci.appveyor.com/project/musm/Amal-jl/branch/master)

@@ -89,7 +89,7 @@ function run_bench(bench_modules, test_types)
         "exp2"  => x_exp2,
         "exp10" => x_exp10,
         # "expm1" => x_expm1,
-        # "log"   => x_log,
+        "log"   => x_log,
         # "log2"  => x_log10,
         # "log10" => x_log10,
         # "log1p" => x_log1p,

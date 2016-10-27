@@ -14,9 +14,7 @@ With support for `Float16`, `Float32`, and `Float64` types. In the future we pla
 Amal is an amalgamation of ideas from several open source math libraries, including SLEEF, Cephes, and Musl, and other references, which have all been taken into consideration for the design of this library, combining the best of breed ideas.
 
 
-The Amal library principles include: avoid expensive branches and to avoid table look ups and to use FMA instructions for CPU's that support it. For cpu's with FMA instruction we take advantage of FMA and prefer polynomial functions to maximize performance and accuracy. Currently, only the FMA optimized functions are available which are very accurate. The library also includes variants for non-fma systems but are not currently automatically selected. (warning: please do not rely on travis/appveyor logs to obtain library accuracy references.)
-
-
+The Amal library principles include: avoid expensive branches and to avoid table look ups and to use FMA instructions for CPU's that support it. For CPU's with FMA instruction we take advantage of FMA and prefer polynomial functions to maximize performance and accuracy. Currently, only the FMA optimized functions are available which are very accurate. The library also includes variants for non-FMA systems but are not currently automatically selected. (warning: please do not rely on travis/appveyor logs to obtain library accuracy references.)
 
 
 
@@ -37,7 +35,8 @@ and then to restart `julia`; this will ensure you are taking full advantage of h
 The exported functions presently include
 ```julia
 exp, exp2, exp10,
-log
+log, ilog2,
+frexp
 ```
 More functions to come in the near future.
 

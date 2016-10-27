@@ -54,31 +54,30 @@ end
     return x2*p1 + x4*p2
 end
 
+
 function log{T}(x::T)
     x < 0 && throw(DomainError())
 
-    # reduction, same as frexp but with custom error handling
-    xu = reinterpret(Unsigned,x)
-    xe = xu & exponent_mask(T)
-    k = Int(xe >> significand_bits(T))
-
-    if xe == 0 # x is subnormal
-        x == 0 && return T(-Inf) # x equals +-0 
-        xs = xu & sign_mask(T)
-        xu $= xs
-        m = leading_zeros(xu) - exponent_bits(T)
-        xu <<= m
-        xu $= xs
-        k = 1 - m
-    elseif xe == exponent_mask(T) # NaN or Inf
-        return x
+    # reduction, same as frexp but with custom exception handling
+    xu = reinterpret(Unsigned, x)
+    xs = xu & ~sign_mask(T)
+    xs >= exponent_mask(T) && return x # NaN or Inf exception
+    k = Int(xs >> significand_bits(T))
+    # subnormal handling
+    if xs <= (~exponent_mask(T) & ~sign_mask(T))
+         # +-0  exception
+        xs == 0 && return T(-Inf)
+        # get exponent
+        m = leading_zeros(xs) - exponent_bits(T)
+        xs <<= unsigned(m)
+        xu = xs $ (xu & sign_mask(T)) # restore sign
+        k = 1 - signed(m)
     end
 
     k -= (exponent_bias(T) - 1)
     xu = (xu & ~exponent_mask(T)) | exponent_half(T)
-    f = reinterpret(T,xu)
-    # in other words the above are the same as:
-    # f, k = _frexp(x) # also include exception handling
+    f = reinterpret(T, xu)
+
 
     # scale up if smaller than sqrt(2)/2 for bettery accuracy
     if f < T(SQRT22)

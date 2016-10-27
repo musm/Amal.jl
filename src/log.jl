@@ -19,7 +19,7 @@ function log end
 #    where  sqrt(2)/2 < 1+f < sqrt(2).
 #
 # 2. Approximation of log(1+f). Let s = f/(2+f); based on log(1+f) = log(1+s) - log(1-s)
-#       = 2s + 2/3 s**3 + 2/5 s**5 + .....,
+#       = 2s + 2/3 s^3 + 2/5 s^5 + .....,
 #       = 2s + s*p
 #
 #    We use a special Remez algorithm on [0, f/(f+2)] (where f = sqrt(2)-1S) to
@@ -65,9 +65,7 @@ function log{T}(x::T)
     k = Int(xs >> significand_bits(T))
     # subnormal handling
     if xs <= (~exponent_mask(T) & ~sign_mask(T))
-         # +-0  exception
-        xs == 0 && return T(-Inf)
-        # get exponent
+        xs == 0 && return T(-Inf) # ±0  exception
         m = leading_zeros(xs) - exponent_bits(T)
         xs <<= unsigned(m)
         xu = xs $ (xu & sign_mask(T)) # restore sign
@@ -77,7 +75,6 @@ function log{T}(x::T)
     k -= (exponent_bias(T) - 1)
     xu = (xu & ~exponent_mask(T)) | exponent_half(T)
     f = reinterpret(T, xu)
-
 
     # scale up if smaller than sqrt(2)/2 for bettery accuracy
     if f < T(SQRT22)

@@ -2,7 +2,7 @@ function is_fma_fast end
 for T in (Float32, Float64)
     @eval is_fma_fast(::Type{$T}) = $(muladd(nextfloat(T(1.0)), nextfloat(one(T)), -nextfloat(T(1.0), 2)) != zero(T))
 end
-const FMA_FAST = is_fma_fast(Float64) && is_fma_fast(Float32)
+const IS_FMA_FAST = is_fma_fast(Float64) && is_fma_fast(Float32)
 
 
 # evaluate p[1] + x * (p[2] + x * (....)), i.e. a polynomial via Horner's rule

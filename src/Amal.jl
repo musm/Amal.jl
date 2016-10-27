@@ -38,15 +38,14 @@ include("constants.jl")
 
 include("ldexp.jl")
 
-if FMA_FAST
-    include("poly/exp.jl")   # slightly less accurate than rational version on non FMA systems
-    include("poly/exp2.jl")  # more accurate than rational version for FMA systems
+if IS_FMA_FAST
+    include("exp.jl")   # slightly less accurate than rational version on non FMA systems
+    include("exp2.jl")  # more accurate than rational version for FMA systems
 else
-    include("exp.jl")
-    include("exp2.jl") # more accurate for non FMA systems
+    include("nofma/exp.jl")
+    include("nofma/exp2.jl") # more accurate for non FMA systems
 end
-# include("exp10.jl") # try to develop a better rational approximation
-include("poly/exp10.jl") # better than rational version for FMA and non FMA systems
+include("exp10.jl") # better than rational version for FMA and non FMA systems
 
 include("log.jl")
 include("ilog2.jl")

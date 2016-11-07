@@ -45,7 +45,7 @@ else
     include("nofma/exp.jl")
     include("nofma/exp2.jl") # more accurate for non FMA systems
 end
-include("exp10.jl") # better than rational version for FMA and non FMA systems
+include("exp10.jl")
 
 include("log.jl")
 include("ilog2.jl")

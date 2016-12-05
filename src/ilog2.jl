@@ -8,20 +8,17 @@ logarithm. In other words, this computes the binary exponent of `x` such that
 Exceptional cases (where `Int` is the machine wordsize)
 
 * `x = 0`    returns `typemin(Int)`
-* `x = ±Inf`  returns `typemax(Int)`
+* `x = ±Inf` returns `typemax(Int)`
 * `x = NaN`  returns `typemax(Int)`
 """
-function ilog2{T}(x::T)
-    xu = reinterpret(Unsigned, x)
-    xs = xu & ~sign_mask(T)
+function ilog2{T<:AbstractFloat}(x::T)
+    xs = reinterpret(Unsigned, x) & ~sign_mask(T)
     xs >= exponent_mask(T) && return typemax(Int) # NaN or Inf
     k = Int(xs >> significand_bits(T))
     if xs <= (~exponent_mask(T) & ~sign_mask(T)) # x is subnormal
         xs == 0 && return typemin(Int)
-        m = unsigned(leading_zeros(xs) - exponent_bits(T))
-        xs <<= m
-        xu = xs $ (xu & sign_mask(T))
-        k = 1 - signed(m)
+        m = leading_zeros(xs) - exponent_bits(T)
+        k = 1 - m
     end
     return k - exponent_bias(T)
 end

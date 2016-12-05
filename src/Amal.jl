@@ -18,11 +18,11 @@ inttype(::Type{Float64}) = Int64
 inttype(::Type{Float32}) = Int32
 inttype(::Type{Float16}) = Int16
 
-exponent_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
+exponent_raw_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 # reinterpret an integer to the corresponding float of the same size
 intasfloat{T<:IEEEFloat}(::Type{T}, m::Integer) = reinterpret(T, (m % inttype(T)) << significand_bits(T))
 # reinterpret a float to the corresponding int of the same size
-floatasint{T<:IEEEFloat}(d::T) = (reinterpret(inttype(T), d) >> significand_bits(T)) % Int
+floatasint{T<:IEEEFloat}(d::T) = reinterpret(Signed, d) >> significand_bits(T)
 
 # unsafe truncate x
 _trunc{T<:IEEEFloat}(x::T) = unsafe_trunc(Int, x)
@@ -36,6 +36,8 @@ _div{T<:Base.BitSigned64}(x::T, y::T) = Base.llvmcall("%3 = sdiv i64 %0, %1 ret 
 include("macros.jl")
 include("constants.jl")
 
+#Floating point manipulation functions
+include("frexp.jl")
 include("ldexp.jl")
 
 if IS_FMA_FAST
@@ -50,7 +52,5 @@ include("exp10.jl")
 include("log.jl")
 include("ilog2.jl")
 
-#Floating point manipulation functions
-include("frexp.jl")
 
 end

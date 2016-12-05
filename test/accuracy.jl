@@ -1,8 +1,12 @@
-tol = 5
 
 denormalmin(::Type{Float64}) = 5.0e-324
 denormalmin(::Type{Float32}) = 1.0f-45
 
+# the following obviously rely on ^ being defined...
+denormals(::Type{Float64}) = 2.0.^-(1023.0:1074.0) 
+denormals(::Type{Float32}) = 2f0.^-(127f0:149f0)
+
+tol = 5
 @testset "Accuracy (in ulp) for $T" for T in (Float64, Float32)
     println("Accuracy tests for $T")
     
@@ -20,8 +24,7 @@ denormalmin(::Type{Float32}) = 1.0f-45
 
     xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
     test_acc(T, Dict(Amal.log => Base.log), xx, tol)
-
-    # @test countulp(T, Amal.log(denormalmin(T)), Base.log(BigFloat(denormalmin(T)))) < 1.0
+    test_acc(T, Dict(Amal.log => Base.log), denormals(T), tol)
 
 
     # xx = map(T, vcat(0:0.2:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))

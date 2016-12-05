@@ -68,9 +68,8 @@ end
 function runtests()
     @testset "Amal" begin
     include("exceptional.jl")
-    include("accuracy.jl")
+    # include("accuracy.jl")
     end
 end
 
 runtests()
-

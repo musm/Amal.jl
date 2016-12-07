@@ -15,7 +15,7 @@ function ilog2{T<:AbstractFloat}(x::T)
     xs = reinterpret(Unsigned, x) & ~sign_mask(T)
     xs >= exponent_mask(T) && return typemax(Int) # NaN or Inf
     k = Int(xs >> significand_bits(T))
-    if xs <= (~exponent_mask(T) & ~sign_mask(T)) # x is subnormal
+    if k == 0 # x is subnormal
         xs == 0 && return typemin(Int)
         m = leading_zeros(xs) - exponent_bits(T)
         k = 1 - m

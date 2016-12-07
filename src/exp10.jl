@@ -55,5 +55,5 @@ function exp10{T}(x::T)
 
     # compute approximation
     u = _exp10(r)
-    return _ldexp(u,n)
+    return _ldexp(u, n)
 end

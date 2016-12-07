@@ -84,7 +84,6 @@ macro oftype_float(ex::Expr)
             end
             ex_body  = _numeric(type_parameter, ex_body)
             return esc(ex)
-
         # if signature is in the form f{T<:Type}(x::T)
         elseif is(ex_sig.args[1].head, :curly) && isa(ex_sig.args[2],Expr)
              # assume first argument type signature is the same for all other numeric type signatures arguments

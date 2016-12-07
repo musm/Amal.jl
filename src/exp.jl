@@ -49,5 +49,5 @@ function exp{T}(x::T)
 
     # compute approximation
     u = _exp(r)
-    return _ldexp(u,n)
+    return _ldexp(u, n)
 end

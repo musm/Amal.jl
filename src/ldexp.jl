@@ -8,7 +8,7 @@ function ldexp{T<:AbstractFloat}(x::T, e::Integer)
     xs = xu & ~sign_mask(T)
     xs >= exponent_mask(T) && return x # NaN or Inf
     k = Int(xs >> significand_bits(T))
-    if xs <= (~exponent_mask(T) & ~sign_mask(T)) # x is subnormal
+    if k == 0 # x is subnormal
         xs == 0 && return x # +-0
         m = leading_zeros(xs) - exponent_bits(T)
         ys = xs << unsigned(m)
@@ -45,7 +45,6 @@ function ldexp{T<:AbstractFloat}(x::T, e::Integer)
     end
 end
 
-
 # private
 
 @inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, UInt(9), UInt(31), UInt(2))
@@ -68,8 +67,8 @@ intasfloat{T<:AbstractFloat}(::Type{T}, m::Integer) = reinterpret(T, (inttype(T)
     m = ifelse(m < 0, 0, m)
     m = ifelse(m > emax, emax, m)
     q += bias
-    u = intasfloat(T,m)
+    u = intasfloat(T, m)
     x = x*u*u*u*u
-    u = intasfloat(T,q)
+    u = intasfloat(T, q)
     return x*u
 end

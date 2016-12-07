@@ -63,5 +63,5 @@ function exp{T}(x::T)
     z = r*r
     p = r - z * _exp(z)
     x = T(1.0) - ((lo - r*p/(T(2.0) - p)) - hi)
-    return _ldexp(x,n)
+    return _ldexp(x, n)
 end

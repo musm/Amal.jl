@@ -1,11 +1,3 @@
-"""
-    log(x)
-
-Compute the natural logarithm of `x`. Throws `DomainError` for negative Real
-arguments. Use complex negative arguments to obtain complex results.
-"""
-function log end
-
 # Based on FreeBSD lib/msun/src/e_log.c
 # ====================================================
 # Copyright (C) 2004 by Sun Microsystems, Inc. All rights reserved. Permission
@@ -37,8 +29,10 @@ function log end
 #    Here ln2 is split into two floating point number: ln2u (upper) and ln2l (lower)
 
 
-# split polynomial evaluation scheme
-@inline function _log{T}(x2::T)
+# below uses a split polynomial evaluation scheme with
+# custom coefficients
+
+@inline function log_kernel{T<:LargeFloat}(x2::T)
     x4 = x2*x2
     p1 = @horner_oftype(x4, 6.666666666666735130e-1, 2.857142874366239149e-1,
         1.818357216161805012e-1, 1.479819860511658591e-1)
@@ -47,7 +41,7 @@ function log end
     return x2*p1 + x4*p2
 end
 
-@inline function _log{T<:SmallFloat}(x2::T)
+@inline function log_kernel{T<:SmallFloat}(x2::T)
     x4 = x2*x2
     p1 = @horner_oftype(x4, 0.6666666269302368, 0.2849878668785095)
     p2 = @horner_oftype(x4, 0.40000972151756287, 0.24279078841209412)
@@ -55,7 +49,13 @@ end
 end
 
 
-function log{T}(x::T)
+"""
+    log(x)
+
+Compute the natural logarithm of `x`. Throws `DomainError` for negative Real
+arguments. Use complex negative arguments to obtain complex results.
+"""
+function log{T<:IEEEFloat}(x::T)
     x < 0 && throw(DomainError())
 
     # reduction, same as frexp but with custom exception handling
@@ -63,15 +63,13 @@ function log{T}(x::T)
     xs = xu & ~sign_mask(T)
     xs >= exponent_mask(T) && return x # NaN or Inf exception
     k = Int(xs >> significand_bits(T))
-    # subnormal handling
-    if xs <= (~exponent_mask(T) & ~sign_mask(T))
+    if k == 0 # subnormal
         xs == 0 && return T(-Inf) # ±0  exception
         m = leading_zeros(xs) - exponent_bits(T)
         xs <<= unsigned(m)
-        xu = xs $ (xu & sign_mask(T)) # restore sign
-        k = 1 - signed(m)
+        xu = xs | (xu & sign_mask(T)) # restore sign
+        k = 1 - m
     end
-
     k -= (exponent_bias(T) - 1)
     xu = (xu & ~exponent_mask(T)) | exponent_half(T)
     f = reinterpret(T, xu)
@@ -86,7 +84,7 @@ function log{T}(x::T)
     # compute approximation
     s = f/(f + 2)
     s2 = s*s
-    p = _log(s2)
+    p = log_kernel(s2)
     hf2 = T(0.5)*f*f
     return k*LN2U(T) - ((hf2 - (s*(hf2 + p) + k*LN2L(T))) - f)
 end

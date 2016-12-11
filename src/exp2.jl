@@ -17,7 +17,7 @@ function exp2 end
 #
 #    3. Scale back: exp2(x) = 2^k * exp2(r)
 
-@inline _exp2{T}(x::T) = @horner_oftype(x, 1.0,
+@inline _exp2{T<:LargeFloat}(x::T) = @horner_oftype(x, 1.0,
     0.69314718055994528622676398299518041312694549560547,
     0.240226506959100721827482516346208285540342330932617,
     5.5504108664823380292485666132051846943795680999756e-2,
@@ -41,7 +41,7 @@ function exp2 end
     1.54563575051724910736083984375e-4,
     1.4599625501432456076145172119140625e-5)
 
-function exp2{T}(x::T)
+function exp2{T<:IEEEFloat}(x::T)
     x > MAXEXP2(T) && return T(Inf)
     x < MINEXP2(T) && return T(0.0)
     

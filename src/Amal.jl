@@ -52,5 +52,10 @@ include("exp10.jl")
 include("log.jl")
 include("ilog2.jl")
 
+for f in (:exp,:exp2,:exp10,:log)
+    @eval begin
+        ($f)(x::Real) = ($f)(float(x))
+    end
+end
 
 end

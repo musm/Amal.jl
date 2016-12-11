@@ -102,8 +102,6 @@ function run_bench(bench_modules, test_types)
         # "cbrt"  => x_cbrt
         )
 
-
-
     for n in bench_modules
         for (f,x) in micros
             suite[n][f] = BenchmarkGroup([f])
@@ -113,7 +111,6 @@ function run_bench(bench_modules, test_types)
             end
         end
     end
-
 
     tune_params = joinpath(dirname(@__FILE__), "params.jld")
     if !isfile(tune_params) || RETUNE

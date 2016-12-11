@@ -37,7 +37,7 @@ function exp end
 # 3. Scale back: exp(x) = 2^k * exp(r)
 
 # coefficients from: lib/msun/src/e_exp.c
-@inline _exp{T}(x::T) = @horner_oftype(x, 1.66666666666666019037e-1,
+@inline _exp{T<:LargeFloat}(x::T) = @horner_oftype(x, 1.66666666666666019037e-1,
         -2.77777777770155933842e-3,
         6.61375632143793436117e-5,
         -1.65339022054652515390e-6,
@@ -48,7 +48,7 @@ function exp end
         -2.777527086436748504638671875e-3,
         6.451140507124364376068115234375e-5)
 
-function exp{T}(x::T)
+function exp{T<:IEEEFloat}(x::T)
     x > MAXEXP(T) && return T(Inf)
     x < MINEXP(T) && return T(0.0)
  

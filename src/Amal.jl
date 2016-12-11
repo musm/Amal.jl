@@ -10,7 +10,8 @@ typealias LargeFloat Union{Float64}
 typealias SmallFloat Union{Float16,Float32}
 
 
-using Base: significand_bits, exponent_bias, exponent_mask, exponent_half, leading_zeros, exponent_bits, sign_mask
+using Base: significand_mask, significand_bits, exponent_bias, exponent_mask,
+    exponent_half, leading_zeros, exponent_bits, sign_mask
 
 #################################################################################################
 

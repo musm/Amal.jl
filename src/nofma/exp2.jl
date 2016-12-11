@@ -1,10 +1,3 @@
-"""
-    exp2(x)
-
-Compute the base `2` exponential of `x`, in other words ``2^x``.
-"""
-function exp2 end
-
 # Based on FreeBSD lib/msun/src/e_exp.c
 # ====================================================
 # Copyright (C) 2004 by Sun Microsystems, Inc. All rights reserved. Permission
@@ -39,20 +32,38 @@ function exp2 end
 #    in a very innacurate function
 
 # coefficients from: lib/msun/src/e_exp.c
-@inline _exp2{T<:LargeFloat}(x::T) = @horner_oftype(x, 1.66666666666666019037e-1,
+@inline exp2_kernel{T<:LargeFloat}(x::T) = @horner_oftype(x, 1.66666666666666019037e-1,
         -2.77777777770155933842e-3,
         6.61375632143793436117e-5,
         -1.65339022054652515390e-6,
         4.13813679705723846039e-8)
 
 # custom coefficients
-@inline _exp2{T<:SmallFloat}(x::T) = @horner_oftype(x, 0.1666666567325592041015625,
+@inline exp2_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 0.1666666567325592041015625,
         -2.777527086436748504638671875e-3,
         6.451140507124364376068115234375e-5)
 
+"""
+    exp2(x)
+
+Compute the base `2` exponential of `x`, in other words ``2^x``.
+"""
 function exp2{T<:IEEEFloat}(x::T)
-    x > MAXEXP2(T) && return T(Inf)
-    x < MINEXP2(T) && return T(0.0)
+    xu = reinterpret(Unsigned, x)
+    xs = xu & ~sign_mask(T)
+    xsb = xu & sign_mask(T)
+
+    # filter out non-finite arguments
+    if xs > reinterpret(Unsigned, MAXEXP(T))
+        if xs >= exponent_mask(T)
+            if xs & significand_mask(T) != 0
+                return T(NaN) 
+            end
+            return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
+        end
+        x > MAXEXP2(T) && return T(Inf)
+        x < MINEXP2(T) && return T(0.0)
+    end
  
     # reduce: computed as r = hi - lo for extra precision
     k = round(x)
@@ -64,7 +75,7 @@ function exp2{T<:IEEEFloat}(x::T)
     # compute approximation
     r = hi - lo
     z = r*r
-    p = r - z * _exp2(z)
+    p = r - z * exp2_kernel(z)
     x = T(1.0) - ((lo - r*p/(T(2.0) - p)) - hi)
     return _ldexp(x, n)
 end

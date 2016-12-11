@@ -1,10 +1,3 @@
-"""
-    exp10(x)
-
-Compute the base `10` exponential of `x`, in other words ``10^x``.
-"""
-function exp10 end
-
 #  Method
 #    1. Argument reduction: Reduce x to an r so that |r| <= 0.5*log10(2). Given x,
 #       find r and integer k such that
@@ -17,7 +10,7 @@ function exp10 end
 #
 #    3. Scale back: exp10(x) = 2^k * exp10(r)
 
-@inline _exp10{T<:LargeFloat}(x::T) =  @horner_oftype(x, 1.0,
+@inline exp10_kernel{T<:LargeFloat}(x::T) =  @horner_oftype(x, 1.0,
     2.30258509299404590109361379290930926799774169921875,
     2.6509490552391992146397114993305876851081848144531,
     2.03467859229323178027470930828712880611419677734375,
@@ -34,7 +27,7 @@ function exp10 end
     9.3881392238209649520573607528461934634833596646786e-5,
     -2.64330486232183387018679354696359951049089431762695e-2)
 
-@inline _exp10{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.0,
+@inline exp10_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.0,
     2.302585124969482421875,
     2.650949001312255859375,
     2.0346698760986328125,
@@ -43,6 +36,11 @@ function exp10 end
     0.20749187469482421875,
     5.2789829671382904052734375e-2)
 
+"""
+    exp10(x)
+
+Compute the base `10` exponential of `x`, in other words ``10^x``.
+"""
 function exp10{T<:IEEEFloat}(x::T)
     x > MAXEXP10(T) && return T(Inf)
     x < MINEXP10(T) && return T(0.0)
@@ -54,6 +52,6 @@ function exp10{T<:IEEEFloat}(x::T)
     r = muladd(k, -LOG102L(T), r)
 
     # compute approximation
-    u = _exp10(r)
+    u = exp10_kernel(r)
     return _ldexp(u, n)
 end

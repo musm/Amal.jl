@@ -42,8 +42,21 @@
 Compute the base `10` exponential of `x`, in other words ``10^x``.
 """
 function exp10{T<:IEEEFloat}(x::T)
-    x > MAXEXP10(T) && return T(Inf)
-    x < MINEXP10(T) && return T(0.0)
+    xu = reinterpret(Unsigned, x)
+    xs = xu & ~sign_mask(T)
+    xsb = xu & sign_mask(T)
+
+    # filter out non-finite arguments
+    if xs > reinterpret(Unsigned, MAXEXP(T))
+        if xs >= exponent_mask(T)
+            if xs & significand_mask(T) != 0
+                return T(NaN) 
+            end
+            return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
+        end
+        x > MAXEXP10(T) && return T(Inf)
+        x < MINEXP10(T) && return T(0.0)
+    end
     
     # reduce
     k = round(T(LOG210)*x)

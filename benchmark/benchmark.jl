@@ -1,6 +1,5 @@
 using Amal
 # using Sleef
-# using Cephes
 using BenchmarkTools, JLD 
 using DataStructures, Suppressor 
 
@@ -85,11 +84,11 @@ function run_bench(bench_modules, test_types)
         # "asin"  => x_atrig,
         # "acos"  => x_atrig,
         # "atan"  => x_atan,
-        # "exp"   => x_exp,
+        "exp"   => x_exp,
         # "exp2"  => x_exp2,
         # "exp10" => x_exp10,
         # "expm1" => x_expm1,
-        "log"   => x_log,
+        # "log"   => x_log,
         # "log2"  => x_log10,
         # "log10" => x_log10,
         # "log1p" => x_log1p,

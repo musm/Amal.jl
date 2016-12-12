@@ -40,8 +40,21 @@
 Compute the base `2` exponential of `x`, in other words ``2^x``.
 """
 function exp2{T<:IEEEFloat}(x::T)
-    x > MAXEXP2(T) && return T(Inf)
-    x < MINEXP2(T) && return T(0.0)
+    xu = reinterpret(Unsigned, x)
+    xs = xu & ~sign_mask(T)
+    xsb = xu & sign_mask(T)
+
+    # filter out non-finite arguments
+    if xs > reinterpret(Unsigned, MAXEXP(T))
+        if xs >= exponent_mask(T)
+            if xs & significand_mask(T) != 0
+                return T(NaN) 
+            end
+            return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
+        end
+        x > MAXEXP2(T) && return T(Inf)
+        x < MINEXP2(T) && return T(0.0)
+    end
     
     # reduce
     k = round(x)

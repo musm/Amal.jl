@@ -36,8 +36,21 @@
 Compute the natural base exponential of `x`, in other words ``e^x``.
 """
 function exp{T<:IEEEFloat}(x::T)
-    x > MAXEXP(T) && return T(Inf)
-    x < MINEXP(T) && return T(0.0)
+    xu = reinterpret(Unsigned, x)
+    xs = xu & ~sign_mask(T)
+    xsb = xu & sign_mask(T)
+
+    # filter out non-finite arguments
+    if xs > reinterpret(Unsigned, MAXEXP(T))
+        if xs >= exponent_mask(T)
+            if xs & significand_mask(T) != 0
+                return T(NaN) 
+            end
+            return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
+        end
+        x > MAXEXP(T) && return T(Inf)
+        x < MINEXP(T) && return T(0.0)
+    end
     
     # reduce
     k = round(T(LOG2E)*x)

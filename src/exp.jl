@@ -4,10 +4,9 @@
 #
 #                x = k*ln(2) + r,  |r| <= 0.5*ln(2).
 #
-#    2. Approximate exp2(r) by a polynomial on the interval [-0.5*ln(2), 0.5*ln(2)]:
+#    2. Approximate exp(r) by a polynomial on the interval [-0.5*ln(2), 0.5*ln(2)]:
 #
 #           exp(x) = 1.0 + x + polynomial(x),
-#                  = polynomial(x) + x + 1 (for better accuracy if no fma)
 #
 #    3. Scale back: exp(x) = 2^k * exp(r)
 

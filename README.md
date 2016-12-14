@@ -36,7 +36,7 @@ The exported functions presently include
 ```julia
 exp, exp2, exp10,
 log, ilog2,
-frexp
+frexp, ldexp
 ```
 More functions to come in the near future.
 

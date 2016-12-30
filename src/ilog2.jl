@@ -5,7 +5,7 @@ Returns the integral part of the logarithm of `abs(x)`, using base 2 for the
 logarithm. In other words, this computes the binary exponent of `x` such that
 ``x = significand \\times 2^exponent,`` where ``significand∈\\in [1, 2)``.
 
-Exceptional cases (where `Int` is the machine wordsize)
+Exceptional cases
 
 * `x = 0`    returns `DomainError()`
 * `x = ±Inf` returns `DomainError()`

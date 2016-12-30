@@ -3,8 +3,6 @@
 
 Amal, a pure Julia math library *(work in progress)*
 
-With support for `Float16`, `Float32`, and `Float64` types. In the future we plan support for `Float128` (when available in Julia).
-
 [![Travis Build Status](https://travis-ci.org/JuliaMath/Amal.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Amal.jl)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/a0n8hfkv9fi59ukc/branch/master?svg=true)](https://ci.appveyor.com/project/musm/Amal-jl/branch/master)
 [![Coverage Status](https://coveralls.io/repos/JuliaMath/Amal.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaMath/Amal.jl?branch=master)
@@ -14,8 +12,7 @@ With support for `Float16`, `Float32`, and `Float64` types. In the future we pla
 Amal is an amalgamation of ideas from several open source math libraries, including SLEEF, Cephes, and Musl, and other references, which have all been taken into consideration for the design of this library, combining the best of breed ideas.
 
 
-The Amal library principles include: avoid expensive branches and to avoid table look ups and to use FMA instructions for CPU's that support it. For CPU's with FMA instruction we take advantage of FMA and prefer polynomial functions to maximize performance and accuracy. Currently, only the FMA optimized functions are available which are very accurate. The library also includes variants for non-FMA systems but are not currently automatically selected. (warning: please do not rely on travis/appveyor logs to obtain library accuracy references.)
-
+The Amal library principles include: avoid expensive branches, avoid table look ups, and to use FMA instructions for CPU's that support it. For CPU's with FMA instruction we take advantage of FMA and prefer polynomial functions to maximize performance if it does not sacrifice accuracy. The library also includes variants for non-FMA systems but are not currently automatically selected.
 
 
 ## Installation
@@ -35,8 +32,8 @@ and then to restart `julia`; this will ensure you are taking full advantage of h
 The exported functions presently include
 ```julia
 exp, exp2, exp10,
-log, ilog2,
-frexp, ldexp
+log,
+frexp, ldexp, ilog2
 ```
 More functions to come in the near future.
 
@@ -45,10 +42,7 @@ More functions to come in the near future.
 To use  `Amal.jl`
 ```julia
 julia> Pkg.clone("https://github.com/JuliaMath/Amal.jl.git")
-
 julia> using Amal
-
 julia> Amal.exp(2.0)
 7.38905609893065
-
 ```

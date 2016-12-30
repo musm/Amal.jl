@@ -27,7 +27,7 @@ function ldexp{T<:AbstractFloat}(x::T, e::Integer)
     n = e % Int
     k += n
     # overflow, if k is larger than maximum posible exponent
-    if k >= Int(exponent_mask(T) >> significand_bits(T))
+    if k >= exponent_raw_max(T)
         return flipsign(T(Inf), x)
     end
     if k > 0 # normal case

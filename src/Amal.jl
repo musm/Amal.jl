@@ -1,8 +1,8 @@
 module Amal
 
 export exp, exp2, exp10,
-       log, ilog2,
-       frexp
+       log,
+       frexp, ldexp, ilog2
 
 using Base: significand_mask, significand_bits, exponent_bias, exponent_mask,
     exponent_half, leading_zeros, exponent_bits, sign_mask

@@ -4,16 +4,15 @@ export exp, exp2, exp10,
        log, ilog2,
        frexp
 
-typealias IEEEFloat Union{Float16,Float32,Float64}
-
-typealias LargeFloat Union{Float64}
-typealias SmallFloat Union{Float16,Float32}
-
-
 using Base: significand_mask, significand_bits, exponent_bias, exponent_mask,
     exponent_half, leading_zeros, exponent_bits, sign_mask
 
-#################################################################################################
+typealias IEEEFloat Union{Float16,Float32,Float64}
+typealias LargeFloat Union{Float64}
+typealias SmallFloat Union{Float16,Float32}
+
+#####################################################
+# helper functions and macros
 
 inttype(::Type{Float64}) = Int64
 inttype(::Type{Float32}) = Int32
@@ -31,13 +30,33 @@ _trunc{T<:IEEEFloat}(x::T) = unsafe_trunc(Int, x)
 _trunc(x::Float16) = (isnan(x) || isinf(x)) ? typemin(Int16) : trunc(Int, x)
 
 # unsafe div
-_div{T<:Base.BitSigned64}(x::T, y::T) = Base.llvmcall("%3 = sdiv i64 %0, %1 ret i64 %3", T, Tuple{T, T}, x, y)
-#################################################################################################
+_div{T<:Base.BitSigned64}(x::T, y::T) = 
+    Base.llvmcall("%3 = sdiv i64 %0, %1 ret i64 %3", T, Tuple{T, T}, x, y)
 
-include("macros.jl")
+
+function is_fma_fast end
+for T in (Float32, Float64)
+    @eval is_fma_fast(::Type{$T}) = 
+        $(muladd(nextfloat(T(1.0)), nextfloat(one(T)), -nextfloat(T(1.0), 2)) != zero(T))
+end
+const IS_FMA_FAST = is_fma_fast(Float64) && is_fma_fast(Float32)
+
+# evaluate p[1] + x * (p[2] + x * (....)), i.e. a polynomial via Horner's rule
+# and convert coefficients to same type as x
+macro horner_oftype(x, p...)
+    @gensym val
+    ex = :(oftype($(esc(x)),$(esc(p[end]))))
+    for i = length(p)-1:-1:1
+        ex = :(muladd($val, $ex, oftype($(esc(x)),$(esc(p[i])))))
+    end
+   return Expr(:block, :($val = $(esc(x))), ex)
+end
+
+#####################################################
+
 include("constants.jl")
 
-#Floating point manipulation functions
+# floating point manipulation functions
 include("frexp.jl")
 include("ldexp.jl")
 
@@ -53,10 +72,17 @@ include("exp10.jl")
 include("log.jl")
 include("ilog2.jl")
 
-for f in (:exp,:exp2,:exp10,:log)
+# Float16 definitions
+for func in (:exp,:exp2,:exp10,:log)
     @eval begin
-        ($f)(x::Real) = ($f)(float(x))
+        $func(a::Float16) = Float16($func(Float32(a)))
     end
 end
+ldexp(x::Float16, q::Integer) = Float16(ldexp(Float32(x), q))
 
+for func in (:exp,:exp2,:exp10,:log)
+    @eval begin
+        $func(x::Real) = $func(float(x))
+    end
+end
 end

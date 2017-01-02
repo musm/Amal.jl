@@ -58,13 +58,13 @@ function exp2{T<:IEEEFloat}(x::T)
     xsb = Int(xu >> Unsigned(8*sizeof(T)-1))
 
     # filter out non-finite arguments
-    if xs > reinterpret(Unsigned, MAXEXP(T))
+    if xs > reinterpret(Unsigned, MAXEXP2(T))
         if xs >= exponent_mask(T)
             xs & significand_mask(T) != 0 && return T(NaN)
             return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
         end
-        x > MAXEXP(T) && return T(Inf)
-        x < MINEXP(T) && return T(0.0)
+        x > MAXEXP2(T) && return T(Inf)
+        x < MINEXP2(T) && return T(0.0)
     end
 
     # argument reduction
@@ -107,7 +107,7 @@ function exp2{T<:IEEEFloat}(x::T)
         twopk = reinterpret(T, ((exponent_bias(T) + k) % typeof(xu)) << significand_bits(T))
         return y*twopk
     else
-        # add significand_bits(T) to lift the range outside the subnormals
+        # add significand_bits(T) + 1 to lift the range outside the subnormals
         twopk = reinterpret(T,
             ((exponent_bias(T) + significand_bits(T) + 1 + k) % typeof(xu)) << significand_bits(T))
         return y*twopk*T(2.0)^(-significand_bits(T) - 1)

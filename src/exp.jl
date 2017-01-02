@@ -53,7 +53,7 @@ function exp{T<:IEEEFloat}(x::T)
     
     # reduce
     k = round(T(LOG2E)*x)
-    n = _trunc(k)
+    n = unsafe_trunc(k)
     r = muladd(k, -LN2U(T), x)
     r = muladd(k, -LN2L(T), r)
 

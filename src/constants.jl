@@ -1,5 +1,7 @@
 # constants
 
+# log(2)
+const LN2 = 6.931471805599453094172321214581765680755001343602552541206800094933936219696955e-01
 # log2(e)
 const LOG2E = 1.442695040888963407359924681001892137426646
 # log2(10)
@@ -30,7 +32,7 @@ MAXEXP(::Type{Float64}) = 7.09782712893383996732e2 # log 2^1023*(2-2^-52)
 MAXEXP(::Type{Float32}) = 88.72283905206835f0      # log 2^127 *(2-2^-23)
 MAXEXP(::Type{Float16}) = Float16(11.09)           # log 2^15  *(2-2^-10)
 
-MAXEXP2(::Type{Float64}) = 1024         # log2 2^1023*(2-2^-52)
+MAXEXP2(::Type{Float64}) = 1024.0       # log2 2^1023*(2-2^-52)
 MAXEXP2(::Type{Float32}) = 128f0        # log2 2^127 *(2-2^-23)
 MAXEXP2(::Type{Float16}) = Float16(16)  # log2 2^15  *(2-2^-10)
 
@@ -43,7 +45,7 @@ MINEXP(::Type{Float64}) = -7.451332191019412076235e2 # log 2^-1075
 MINEXP(::Type{Float32}) = -103.97207708f0            # log 2^-150
 MINEXP(::Type{Float16}) = Float16(-17.32868)         # log 2^-25
 
-MINEXP2(::Type{Float64}) = -1075        # log2 2^-1075
+MINEXP2(::Type{Float64}) = -1075.0      # log2 2^-1075
 MINEXP2(::Type{Float32}) = -150f0       # log2 2^-150
 MINEXP2(::Type{Float16}) = Float16(-25) # log2 2^-25
 

@@ -58,7 +58,7 @@ function exp2{T<:IEEEFloat}(x::T)
     
     # reduce
     k = round(x)
-    n = _trunc(k)
+    n = unsafe_trunc(k)
     r = x - k
 
     # compute approximation

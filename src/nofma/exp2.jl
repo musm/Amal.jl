@@ -67,7 +67,7 @@ function exp2{T<:IEEEFloat}(x::T)
  
     # reduce: computed as r = hi - lo for extra precision
     k = round(x)
-    n = _trunc(k)
+    n = unsafe_trunc(k)
     t = x - k
     hi = t*LN2U(T)
     lo = -t*LN2L(T)

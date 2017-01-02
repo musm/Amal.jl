@@ -11,8 +11,7 @@ Amal, a pure Julia math library *(work in progress)*
 
 Amal is an amalgamation of ideas from several open source math libraries, including SLEEF, Cephes, and Musl, and other references, which have all been taken into consideration for the design of this library, combining the best of breed ideas.
 
-
-The Amal library principles include: avoid expensive branches, avoid table look ups, and to use FMA instructions for CPU's that support it. For CPU's with FMA instruction we take advantage of FMA and prefer polynomial functions to maximize performance if it does not sacrifice accuracy. The library also includes variants for non-FMA systems but are not currently automatically selected.
+The Amal library principles include: avoid expensive branches, avoid table look ups, and to use FMA instructions for CPU's that support it. For CPU's with FMA instruction we take advantage of FMA and prefer polynomial functions to maximize performance if it does not sacrifice accuracy.
 
 
 ## Installation

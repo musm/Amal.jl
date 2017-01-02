@@ -1,38 +1,51 @@
-#  Method
-#    1. Argument reduction: Reduce x to an r so that |r| <= 0.5. Given x,
-#       find r and integer k such that
-#
-#                x = k + r,  |r| <= 0.5.
-#
-#    2. Approximate exp2(r) by a polynomial on the interval [-0.5, 0.5]:
-#
-#           exp2(x) = 1.0 + polynomial(x),
-#
-#    3. Scale back: exp2(x) = 2^k * exp2(r)
+# Based on FreeBSD lib/msun/src/e_exp.c
+# ====================================================
+# Copyright (C) 2004 by Sun Microsystems, Inc. All rights reserved. Permission
+# to use, copy, modify, and distribute this software is freely granted,
+# provided that this notice is preserved.
+# ====================================================
 
-@inline exp2_kernel{T<:LargeFloat}(x::T) = @horner_oftype(x, 1.0,
-    0.69314718055994528622676398299518041312694549560547,
-    0.240226506959100721827482516346208285540342330932617,
-    5.5504108664823380292485666132051846943795680999756e-2,
-    9.618129107628051871481389412110729608684778213501e-3,
-    1.3333558145962711230514408100589207606390118598938e-3,
-    1.54035303940471083325794432461464111838722601532936e-4,
-    1.52527343581534264687878457711356361414800630882382e-5,
-    1.3215486321169555424209860611250988426945696119219e-6,
-    1.01777526742633583156634826966807638726209006563295e-7,
-    7.0550611328426153816964051335245550200525599393586e-9,
-    4.5441884834923169985517595445740929999134394279281e-10,
-    2.55208683164155542627190035541293782264671285986424e-11,
-    -1.00458805873217110125204978507248889784547740688936e-11)
+# Method
+# 1. Argument reduction: Reduce x to an r so that |r| <= 0.5*ln(2). Given x,
+#    find r and integer k such that
+#       x = k*ln(2) + r,  |r| <= 0.5*ln(2).
+#    Here r is represented as r = hi - lo for better accuracy.
+#    
+# 2. Approximate exp(r) by a special rational function on [0, 0.5*ln(2)]:
+#       R(r^2) = r*(exp(r)+1)/(exp(r)-1) = 2 + r*r/6 - r^4/360 + ...
+#    
+#    A special Remez algorithm on [0, 0.5*ln(2)] is used to generate a
+#    polynomial to approximate R.
+#        
+#    The computation of exp(r) thus becomes
+#                       2*r
+#       exp(r) = 1 + ----------
+#                     R(r) - r
+#                          r*c(r)
+#              = 1 + r + ----------- (for better accuracy)
+#                         2 - c(r)
+#    where
+#       c(r) = r - (P1*r^2  + P2*r^4  + ... + P5*r^10 + ...).
+#      
+# 4. To obtain exp2 we simply scale the input argument by log(2) and use
+#    the coefficients from exp(x) Note: trying the same for exp10, results
+#    in a very innacurate function
 
-@inline exp2_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.0,
-    0.693147182464599609375,
-    0.2402265071868896484375,
-    5.5504061281681060791015625e-2,
-    9.6180774271488189697265625e-3,
-    1.333682797849178314208984375e-3,
-    1.54563575051724910736083984375e-4,
-    1.4599625501432456076145172119140625e-5)
+# coefficients from: lib/msun/src/e_exp.c
+@inline exp2_kernel{T<:LargeFloat}(x::T) = @horner_oftype(x, 1.66666666666666019037e-1,
+        -2.77777777770155933842e-3,
+        6.61375632143793436117e-5,
+        -1.65339022054652515390e-6,
+        4.13813679705723846039e-8)
+
+# custom coefficients
+@inline exp2_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 0.1666666567325592041015625,
+        -2.777527086436748504638671875e-3,
+        6.451140507124364376068115234375e-5)
+
+# for values smaller than this threshold just use Taylor expansion of 1 + x*log(2)
+exp2_small_thres(::Type{Float64}) = 2.0^-29
+exp2_small_thres(::Type{Float32}) = 2.0f0^-14
 
 """
     exp2(x)
@@ -42,26 +55,61 @@ Compute the base `2` exponential of `x`, in other words ``2^x``.
 function exp2{T<:IEEEFloat}(x::T)
     xu = reinterpret(Unsigned, x)
     xs = xu & ~sign_mask(T)
-    xsb = xu & sign_mask(T)
+    xsb = Int(xu >> Unsigned(8*sizeof(T)-1))
 
     # filter out non-finite arguments
     if xs > reinterpret(Unsigned, MAXEXP(T))
         if xs >= exponent_mask(T)
-            if xs & significand_mask(T) != 0
-                return T(NaN) 
-            end
+            xs & significand_mask(T) != 0 && return T(NaN)
             return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
         end
-        x > MAXEXP2(T) && return T(Inf)
-        x < MINEXP2(T) && return T(0.0)
+        x > MAXEXP(T) && return T(Inf)
+        x < MINEXP(T) && return T(0.0)
     end
-    
-    # reduce
-    k = round(x)
-    n = unsafe_trunc(k)
-    r = x - k
+
+    # argument reduction
+    if xs > reinterpret(Unsigned, T(0.5)*T(LN2))
+        if xs < reinterpret(Unsigned, T(1.5)*T(LN2))
+            if xsb == 0
+                t = x - T(1.0)
+                hi = t*LN2U(T)
+                lo = -t*LN2L(T)
+                k = 1
+            else
+                t = x + T(1.0)
+                hi = t*LN2U(T)
+                lo = -t*LN2L(T)
+                k = -1
+            end
+        else
+            n = round(x)
+            k = unsafe_trunc(n)
+            t = x - n
+            hi = t*LN2U(T)
+            lo = -t*LN2L(T)
+        end
+        r = hi - lo
+    elseif xs < reinterpret(Unsigned, exp2_small_thres(T))
+        return T(1.0) + x*T(LN2)
+    else # here k = 0, no need for hi and lo, so compute approximation directly
+        z = x*x
+        p = x - z*exp2_kernel(z)
+        return T(1.0) - ((x*p)/(p - T(2.0)) - x)
+    end
 
     # compute approximation
-    u = exp2_kernel(r)
-    return _ldexp(u, n)
+    z = r*r
+    p = r - z*exp2_kernel(z)
+    y = T(1.0) - ((lo - (r*p)/(T(2.0) - p)) - hi)
+    if k > -significand_bits(T)
+        # multiply by 2.0 first to prevent overflow, extending the range
+        k == exponent_max(T) && return y*T(2.0)*T(2.0)^(exponent_max(T)-1)
+        twopk = reinterpret(T, ((exponent_bias(T) + k) % typeof(xu)) << significand_bits(T))
+        return y*twopk
+    else
+        # add significand_bits(T) to lift the range outside the subnormals
+        twopk = reinterpret(T,
+            ((exponent_bias(T) + significand_bits(T) + 1 + k) % typeof(xu)) << significand_bits(T))
+        return y*twopk*T(2.0)^(-significand_bits(T) - 1)
+    end
 end

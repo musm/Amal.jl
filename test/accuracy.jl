@@ -10,6 +10,8 @@ tol = 5
     test_acc(T, Dict(Amal.exp => Base.exp), xx, tol)
     test_acc(T, Dict(Amal.exp => Base.exp), denormals(T), tol)
 
+    @test Amal.exp(-745.1) == 5.0e-324
+
 
     xx = map(T, vcat(-10:0.0002:10, -120:0.023:1000, -1000:0.02:2000))
     test_acc(T, Dict(Amal.exp2 => Base.exp2), xx, tol)

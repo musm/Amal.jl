@@ -20,7 +20,9 @@ inttype(::Type{Float64}) = Int64
 inttype(::Type{Float32}) = Int32
 inttype(::Type{Float16}) = Int16
 
+# maximum float exponent without bias, i.e. raw
 exponent_raw_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
+# maximum float exponent
 exponent_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T)) - exponent_bias(T)
 # reinterpret an integer to the corresponding float of the same size
 intasfloat{T<:IEEEFloat}(::Type{T}, m::Integer) = reinterpret(T, (m % inttype(T)) << significand_bits(T))
@@ -63,13 +65,8 @@ include("constants.jl")
 include("frexp.jl")
 include("ldexp.jl")
 
-# if IS_FMA_FAST
-    # include("exp.jl")   # slightly less accurate than rational version on non FMA systems
-    # include("exp2.jl")  # more accurate than rational version for FMA systems
-# else
-    include(joinpath("nofma","exp.jl"))
-    include(joinpath("nofma","exp2.jl")) # more accurate for non FMA systems
-# end
+include("exp.jl")
+include("exp2.jl")
 include("exp10.jl")
 
 include("log.jl")

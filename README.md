@@ -5,7 +5,7 @@ Amal, a pure Julia math library *(work in progress)*
 
 [![Travis Build Status](https://travis-ci.org/JuliaMath/Amal.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Amal.jl)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/a0n8hfkv9fi59ukc/branch/master?svg=true)](https://ci.appveyor.com/project/musm/Amal-jl/branch/master)
-[![Coverage Status](https://coveralls.io/repos/JuliaMath/Amal.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaMath/Amal.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/JuliaMath/Amal.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaMath/Amal.jl?branch=master)
 [![codecov.io](http://codecov.io/github/JuliaMath/Amal.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaMath/Amal.jl?branch=master)
 
 

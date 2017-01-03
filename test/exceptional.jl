@@ -7,8 +7,10 @@ function NaNs{T}(::Type{T}, i) # i starts counting from the most significant bit
     reinterpret(T,(asint(T, Base.exponent_mask(T)) | asint(T,1) << (Base.significand_bits(T) - i))) # most sig bit
 end
 
-@testset "identities and expectional cases for $T" for T in (Float64, Float32)
 
+@test Amal.exp(-745.1) == 5.0e-324
+
+@testset "identities and expectional cases for $T" for T in (Float64, Float32)
     ## ldexp
 
     @test Amal.ldexp(T(0.0), typemax(Int128))        === T(0.0)

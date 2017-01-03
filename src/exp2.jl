@@ -38,10 +38,8 @@
         -1.65339022054652515390e-6,
         4.13813679705723846039e-8)
 
-# custom coefficients
-@inline exp2_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 0.1666666567325592041015625,
-        -2.777527086436748504638671875e-3,
-        6.451140507124364376068115234375e-5)
+# coefficients from: lib/msun/src/e_expf.c
+@inline exp2_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.6666625440e-1, -2.7667332906e-3)
 
 # for values smaller than this threshold just use Taylor expansion of 1 + x*log(2)
 exp2_small_thres(::Type{Float64}) = 2.0^-29
@@ -68,8 +66,8 @@ function exp2{T<:IEEEFloat}(x::T)
     end
 
     # argument reduction
-    if xs > reinterpret(Unsigned, T(0.5)*T(LN2))
-        if xs < reinterpret(Unsigned, T(1.5)*T(LN2))
+    if xs > reinterpret(Unsigned, T(0.5))
+        if xs < reinterpret(Unsigned, T(1.5))
             if xsb == 0
                 t = x - T(1.0)
                 hi = t*LN2U(T)
@@ -92,6 +90,7 @@ function exp2{T<:IEEEFloat}(x::T)
     elseif xs < reinterpret(Unsigned, exp2_small_thres(T))
         return T(1.0) + x*T(LN2)
     else # here k = 0, no need for hi and lo, so compute approximation directly
+        x *= T(LN2)
         z = x*x
         p = x - z*exp2_kernel(z)
         return T(1.0) - ((x*p)/(p - T(2.0)) - x)

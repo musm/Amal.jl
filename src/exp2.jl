@@ -41,6 +41,11 @@
 # coefficients from: lib/msun/src/e_expf.c
 @inline exp2_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.6666625440e-1, -2.7667332906e-3)
 
+# custom coefficients (slightly better mean accuracy, but also a bit slower)
+# @inline exp_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 0.1666666567325592041015625,
+#         -2.777527086436748504638671875e-3,
+#         6.451140507124364376068115234375e-5)
+
 # for values smaller than this threshold just use Taylor expansion of 1 + x*log(2)
 exp2_small_thres(::Type{Float64}) = 2.0^-29
 exp2_small_thres(::Type{Float32}) = 2.0f0^-14
@@ -59,7 +64,7 @@ function exp2{T<:IEEEFloat}(x::T)
     if xs > reinterpret(Unsigned, MAXEXP2(T))
         if xs >= exponent_mask(T)
             xs & significand_mask(T) != 0 && return T(NaN)
-            return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
+            return xsb == 0 ? T(Inf) : T(0.0) # exp2(+-Inf)
         end
         x > MAXEXP2(T) && return T(Inf)
         x < MINEXP2(T) && return T(0.0)

@@ -36,6 +36,9 @@
     0.20749187469482421875,
     5.2789829671382904052734375e-2)
 
+exp10_small_thres(::Type{Float64}) = 2.0^-29
+exp10_small_thres(::Type{Float32}) = 2.0f0^-13
+
 """
     exp10(x)
 
@@ -44,27 +47,53 @@ Compute the base `10` exponential of `x`, in other words ``10^x``.
 function exp10{T<:IEEEFloat}(x::T)
     xu = reinterpret(Unsigned, x)
     xs = xu & ~sign_mask(T)
-    xsb = xu & sign_mask(T)
+    xsb = Int(xu >> Unsigned(8*sizeof(T)-1))
 
     # filter out non-finite arguments
-    if xs > reinterpret(Unsigned, MAXEXP(T))
+    if xs > reinterpret(Unsigned, MAXEXP10(T))
         if xs >= exponent_mask(T)
-            if xs & significand_mask(T) != 0
-                return T(NaN) 
-            end
-            return xsb == 0 ? T(Inf) : T(0.0) # exp(+-Inf)
+            xs & significand_mask(T) != 0 && return T(NaN)
+            return xsb == 0 ? T(Inf) : T(0.0) # exp10(+-Inf)
         end
         x > MAXEXP10(T) && return T(Inf)
         x < MINEXP10(T) && return T(0.0)
     end
-    
-    # reduce
-    k = round(T(LOG210)*x)
-    n = unsafe_trunc(k)
-    r = muladd(k, -LOG102U(T), x)
-    r = muladd(k, -LOG102L(T), r)
+
+    # argument reduction
+    if xs > reinterpret(Unsigned, T(0.5)*T(LOG102))
+        if xs < reinterpret(Unsigned, T(1.5)*T(LOG102))
+            if xsb == 0
+                k = 1
+                r = muladd(T(1.0), -LOG102U(T), x)
+                r = muladd(T(1.0), -LOG102L(T), r)
+            else
+                k = -1
+                r = muladd(T(-1.0), -LOG102U(T), x)
+                r = muladd(T(-1.0), -LOG102L(T), r)
+            end
+        else
+            n = round(T(LOG210)*x)
+            k = unsafe_trunc(n)
+            r = muladd(n, -LOG102U(T), x)
+            r = muladd(n, -LOG102L(T), r)
+        end
+    elseif xs < reinterpret(Unsigned, exp10_small_thres(T))
+        return T(1.0) + x*T(LN10)
+    else # here k = 0
+        return exp10_kernel(x)
+    end
 
     # compute approximation
-    u = exp10_kernel(r)
-    return _ldexp(u, n)
+    y = exp10_kernel(r)
+    if k > -significand_bits(T)
+        # multiply by 2.0 first to prevent overflow, extending the range
+        k == exponent_max(T) && return y*T(2.0)*T(2.0)^(exponent_max(T)-1)
+        twopk = reinterpret(T, ((exponent_bias(T) + k) % typeof(xu)) << significand_bits(T))
+        return y*twopk
+    else
+        # add significand_bits(T) + 1 to lift the range outside the subnormals
+        twopk = reinterpret(T,
+            ((exponent_bias(T) + significand_bits(T) + 1 + k) % typeof(xu)) << significand_bits(T))
+        return y*twopk*T(2.0)^(-significand_bits(T) - 1)
+    end
 end

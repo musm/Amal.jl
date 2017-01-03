@@ -39,7 +39,7 @@
 # coefficients from: lib/msun/src/e_expf.c
 @inline exp_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.6666625440e-1, -2.7667332906e-3)
 
-# custom coefficients (slightly better mean accuracy, but also a tad slower)
+# custom coefficients (slightly better mean accuracy, but also a bit slower)
 # @inline exp_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 0.1666666567325592041015625,
 #         -2.777527086436748504638671875e-3,
 #         6.451140507124364376068115234375e-5)

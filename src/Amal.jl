@@ -62,15 +62,13 @@ end
 include("constants.jl")
 
 # floating point manipulation functions
-include("frexp.jl")
-include("ldexp.jl")
+include("floatmanip.jl")
 
 include("exp.jl")
 include("exp2.jl")
 include("exp10.jl")
 
 include("log.jl")
-include("ilog2.jl")
 
 # Float16 definitions
 for func in (:exp,:exp2,:exp10,:log)

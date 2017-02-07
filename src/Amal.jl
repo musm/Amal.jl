@@ -1,50 +1,26 @@
 module Amal
 
 export exp, exp2, exp10,
-       log,
-       frexp, ldexp, ilog2
+    log,
+    frexp, ldexp
 
 using Base: significand_mask, significand_bits, exponent_bias, exponent_mask,
-    exponent_half, leading_zeros, exponent_bits, sign_mask
-
-import Base.unsafe_trunc
+    exponent_half, leading_zeros, exponent_bits, sign_mask, unsafe_trunc,
+    @pure, Math.@horner
 
 typealias IEEEFloat Union{Float16,Float32,Float64}
-typealias LargeFloat Union{Float64}
-typealias SmallFloat Union{Float16,Float32}
 
-#####################################################
 # helper functions and macros
 
-inttype(::Type{Float64}) = Int64
-inttype(::Type{Float32}) = Int32
-inttype(::Type{Float16}) = Int16
+# integer size of float
+fpinttype(::Type{Float64}) = UInt64
+fpinttype(::Type{Float32}) = UInt32
+fpinttype(::Type{Float16}) = UInt16
 
-# maximum float exponent without bias, i.e. raw
-exponent_raw_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 # maximum float exponent
-exponent_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T)) - exponent_bias(T)
-# reinterpret an integer to the corresponding float of the same size
-intasfloat{T<:IEEEFloat}(::Type{T}, m::Integer) = reinterpret(T, (m % inttype(T)) << significand_bits(T))
-# reinterpret a float to the corresponding int of the same size
-floatasint{T<:IEEEFloat}(d::T) = reinterpret(Signed, d) >> significand_bits(T)
-
-# unsafe truncate x
-unsafe_trunc{T<:IEEEFloat}(x::T) = unsafe_trunc(Int, x)
-# hack: until we have better Float16 support
-unsafe_trunc(x::Float16) = (isnan(x) || isinf(x)) ? typemin(Int16) : trunc(Int, x)
-
-# unsafe div
-_div{T<:Base.BitSigned64}(x::T, y::T) = 
-    Base.llvmcall("%3 = sdiv i64 %0, %1 ret i64 %3", T, Tuple{T, T}, x, y)
-
-
-function is_fma_fast end
-for T in (Float32, Float64)
-    @eval is_fma_fast(::Type{$T}) = 
-        $(muladd(nextfloat(T(1.0)), nextfloat(one(T)), -nextfloat(T(1.0), 2)) != zero(T))
-end
-const IS_FMA_FAST = is_fma_fast(Float64) && is_fma_fast(Float32)
+@pure exponent_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T)) - exponent_bias(T)
+# maximum float exponent without bias
+@pure exponent_raw_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
 # evaluate p[1] + x * (p[2] + x * (....)), i.e. a polynomial via Horner's rule
 # and convert coefficients to same type as x

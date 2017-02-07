@@ -32,19 +32,14 @@
 #    in a very innacurate function
 
 # coefficients from: lib/msun/src/e_exp.c
-@inline exp2_kernel{T<:LargeFloat}(x::T) = @horner_oftype(x, 1.66666666666666019037e-1,
+@inline exp2_kernel(x::Float64) = @horner(x, 1.66666666666666019037e-1,
         -2.77777777770155933842e-3,
         6.61375632143793436117e-5,
         -1.65339022054652515390e-6,
         4.13813679705723846039e-8)
 
 # coefficients from: lib/msun/src/e_expf.c
-@inline exp2_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 1.6666625440e-1, -2.7667332906e-3)
-
-# custom coefficients (slightly better mean accuracy, but also a bit slower)
-# @inline exp_kernel{T<:SmallFloat}(x::T) = @horner_oftype(x, 0.1666666567325592041015625,
-#         -2.777527086436748504638671875e-3,
-#         6.451140507124364376068115234375e-5)
+@inline exp2_kernel(x::Float32) = @horner(x, 1.6666625440f-1, -2.7667332906f-3)
 
 # for values smaller than this threshold just use Taylor expansion of 1 + x*log(2)
 exp2_small_thres(::Type{Float64}) = 2.0^-29
@@ -86,7 +81,7 @@ function exp2{T<:IEEEFloat}(x::T)
             end
         else
             n = round(x)
-            k = unsafe_trunc(n)
+            k = unsafe_trunc(Int,n)
             t = x - n
             hi = t*LN2U(T)
             lo = -t*LN2L(T)

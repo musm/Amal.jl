@@ -32,7 +32,7 @@
 # below uses a split polynomial evaluation scheme with
 # custom coefficients
 
-@inline function log_kernel{T<:LargeFloat}(x2::T)
+@inline function log_kernel(x2::Float64)
     x4 = x2*x2
     p1 = @horner_oftype(x4, 6.666666666666735130e-1, 2.857142874366239149e-1,
         1.818357216161805012e-1, 1.479819860511658591e-1)
@@ -41,7 +41,7 @@
     return x2*p1 + x4*p2
 end
 
-@inline function log_kernel{T<:SmallFloat}(x2::T)
+@inline function log_kernel(x2::Float32)
     x4 = x2*x2
     p1 = @horner_oftype(x4, 0.6666666269302368, 0.2849878668785095)
     p2 = @horner_oftype(x4, 0.40000972151756287, 0.24279078841209412)

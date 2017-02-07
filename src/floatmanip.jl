@@ -1,9 +1,15 @@
 """
-    ldexp(x::AbstractFloat, n::Integer)
+    ldexp(x, n)
 
-Computes ``x \\times 2^n``.
+Computes ``x \\times 2^n``, using floating point manipulation, i.e. without
+doing the explicit multiplitcation.
+
+```jldoctest
+julia> ldexp(5., 2)
+20.0
+```
 """
-function ldexp{T<:AbstractFloat}(x::T, e::Integer)
+function ldexp{T<:IEEEFloat}(x::T, e::Integer)
     xu = reinterpret(Unsigned, x)
     xs = xu & ~sign_mask(T)
     xs >= exponent_mask(T) && return x # NaN or Inf
@@ -53,7 +59,7 @@ Return `(x, exp)` such that `x` has a magnitude in the interval ``[1/2, 1)`` or 
 \\times 2^{exp}``. In other words, this return the binary significand of `val`, which when
 multiplied by 2 raised to the power `exp` returns `val`.
 """
-function frexp{T<:AbstractFloat}(x::T)
+function frexp{T<:IEEEFloat}(x::T)
     xu = reinterpret(Unsigned, x)
     xs = xu & ~sign_mask(T)
     xs >= exponent_mask(T) && return x, 0 # NaN or Inf
@@ -84,7 +90,7 @@ Exceptional cases
 * `x = ±Inf` returns `DomainError()`
 * `x = NaN`  returns `DomainError()`
 """
-function exponent{T<:AbstractFloat}(x::T)
+function exponent{T<:IEEEFloat}(x::T)
     xs = reinterpret(Unsigned, x) & ~sign_mask(T)
     xs >= exponent_mask(T) && return throw(DomainError()) # NaN or Inf
     k = Int(xs >> significand_bits(T))
@@ -102,8 +108,15 @@ end
 Extract the `significand(s)` (a.k.a. mantissa), in binary representation, of a
 floating-point number. If `x` is a non-zero finite number, then the result will be
 a number of the same type on the interval ``[1,2)``. Otherwise `x` is returned.
+
+```jldoctest
+julia> significand(15.2)/15.2
+0.125
+
+julia> significand(15.2)*8
+15.2
 """
-function significand{T<:AbstractFloat}(x::T)
+function significand{T<:IEEEFloat}(x::T)
     xu = reinterpret(Unsigned, x)
     xs = xu & ~sign_mask(T)
     xs >= exponent_mask(T) && return x # NaN or Inf

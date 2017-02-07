@@ -19,7 +19,7 @@ The Amal library principles include: avoid expensive branches, avoid table look 
 
 We recommend running julia with `-O3` for maximal performance using `Amal.jl` and to also build a custom system image by running
 ```julia
-julia> is_windows() && (Pkg.add("WinRPM"); using WinRPM; WinRPM.install("gcc"))
+julia> is_windows() && (Pkg.add("WinRPM"); using WinRPM; WinRPM.install("gcc", yes=true))
 julia> include(joinpath(dirname(JULIA_HOME),"share","julia","build_sysimg.jl"))
 julia> build_sysimg(force=true)
 ```

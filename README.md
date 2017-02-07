@@ -4,7 +4,7 @@
 Amal, a pure Julia math library *(work in progress)*
 
 [![Travis Build Status](https://travis-ci.org/musm/Amal.jl.svg?branch=master)](https://travis-ci.org/musm/Amal.jl)
-[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/a0n8hfkv9fi59ukc/branch/master?svg=true)](https://ci.appveyor.com/project/musm/Amal-jl/branch/master)
+[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/9eh7v6a7rm0ju0p3/branch/master?svg=true)](https://ci.appveyor.com/project/musm/amal-jl-9l512/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/musm/Amal.jl/badge.svg?branch=master)](https://coveralls.io/github/musm/Amal.jl?branch=master)
 [![codecov.io](http://codecov.io/github/musm/Amal.jl/coverage.svg?branch=master)](http://codecov.io/github/musm/Amal.jl?branch=master)
 

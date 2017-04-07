@@ -4,11 +4,11 @@ export exp, exp2, exp10,
     log,
     frexp, ldexp
 
-using Base: significand_mask, significand_bits, exponent_bias, exponent_mask,
+using Base: significand_mask, Math.significand_bits, exponent_bias, exponent_mask,
     exponent_half, leading_zeros, exponent_bits, sign_mask, unsafe_trunc,
     @pure, Math.@horner
 
-typealias IEEEFloat Union{Float16,Float32,Float64}
+const IEEEFloat = Union{Float16,Float32,Float64}
 
 # helper functions and macros
 

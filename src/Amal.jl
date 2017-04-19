@@ -4,8 +4,8 @@ export exp, exp2, exp10,
     log,
     frexp, ldexp
 
-using Base: significand_mask, Math.significand_bits, exponent_bias, exponent_mask,
-    exponent_half, leading_zeros, exponent_bits, sign_mask, unsafe_trunc,
+using Base: significand_mask, Math.significand_bits, Math.exponent_bias, exponent_mask,
+    exponent_half, leading_zeros, Math.exponent_bits, sign_mask, unsafe_trunc,
     @pure, Math.@horner
 
 const IEEEFloat = Union{Float16,Float32,Float64}

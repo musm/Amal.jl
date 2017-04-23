@@ -112,3 +112,66 @@ function exp2{T<:IEEEFloat}(x::T)
         return y*twopk*T(2.0)^(-significand_bits(T) - 1)
     end
 end
+
+@inline function eexp2{T<:IEEEFloat}(x::T)
+    xu = reinterpret(Unsigned, x)
+    xs = xu & ~sign_mask(T)
+    xsb = Int(xu >> Unsigned(8*sizeof(T)-1))
+
+    # filter out non-finite arguments
+    if xs > reinterpret(Unsigned, MAXEXP2(T))
+        if xs >= exponent_mask(T)
+            xs & significand_mask(T) != 0 && return T(NaN)
+            return xsb == 0 ? T(Inf) : T(0.0) # exp2(+-Inf)
+        end
+        x > MAXEXP2(T) && return T(Inf)
+        x < MINEXP2(T) && return T(0.0)
+    end
+
+    # argument reduction
+    if xs > reinterpret(Unsigned, T(0.5))
+        if xs < reinterpret(Unsigned, T(1.5))
+            if xsb == 0
+                t = x - T(1.0)
+                hi = t*LN2U(T)
+                lo = -t*LN2L(T)
+                k = 1
+            else
+                t = x + T(1.0)
+                hi = t*LN2U(T)
+                lo = -t*LN2L(T)
+                k = -1
+            end
+        else
+            n = round(x)
+            k = unsafe_trunc(Int,n)
+            t = x - n
+            hi = t*LN2U(T)
+            lo = -t*LN2L(T)
+        end
+        r = hi - lo
+    elseif xs < reinterpret(Unsigned, exp2_small_thres(T))
+        return T(1.0) + x*T(LN2)
+    else # here k = 0, no need for hi and lo, so compute approximation directly
+        x *= T(LN2)
+        z = x*x
+        p = x - z*exp2_kernel(z)
+        return T(1.0) - ((x*p)/(p - T(2.0)) - x)
+    end
+
+    # compute approximation
+    z = r*r
+    p = r - z*exp2_kernel(z)
+    y = T(1.0) - ((lo - (r*p)/(T(2.0) - p)) - hi)
+    if k > -significand_bits(T)
+        # multiply by 2.0 first to prevent overflow, extending the range
+        k == exponent_max(T) && return y*T(2.0)*T(2.0)^(exponent_max(T)-1)
+        twopk = reinterpret(T, ((exponent_bias(T) + k) % typeof(xu)) << significand_bits(T))
+        return y*twopk
+    else
+        # add significand_bits(T) + 1 to lift the range outside the subnormals
+        twopk = reinterpret(T,
+            ((exponent_bias(T) + significand_bits(T) + 1 + k) % typeof(xu)) << significand_bits(T))
+        return y*twopk*T(2.0)^(-significand_bits(T) - 1)
+    end
+end

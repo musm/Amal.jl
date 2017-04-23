@@ -1,26 +1,33 @@
 module Amal
 
-export exp, exp2, exp10,
-    log,
-    frexp, ldexp
+# export 
+#    exp, exp2, exp10,
+#    log,
+#    frexp, ldexp
 
-using Base: significand_mask, Math.significand_bits, Math.exponent_bias, exponent_mask,
-    exponent_half, leading_zeros, Math.exponent_bits, sign_mask, unsafe_trunc,
-    @pure, Math.@horner
+using Base:
+    significand_mask, exponent_mask, exponent_half, leading_zeros,
+    Math.significand_bits, Math.exponent_bias, Math.exponent_bits,
+    sign_mask, unsafe_trunc, Math.@horner, @pure
 
 const IEEEFloat = Union{Float16,Float32,Float64}
 
+if VERSION >= v"0.6-"
+    using Base: Math.exponent_max, Math.exponent_raw_max, fpinttype
+else
+    # integer size of float
+    fpinttype(::Type{Float64}) = UInt64
+    fpinttype(::Type{Float32}) = UInt32
+    fpinttype(::Type{Float16}) = UInt16
+
+    # maximum float exponent
+    @pure exponent_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T)) - exponent_bias(T)
+    # maximum float exponent without bias
+    @pure exponent_raw_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
+end
+
+
 # helper functions and macros
-
-# integer size of float
-fpinttype(::Type{Float64}) = UInt64
-fpinttype(::Type{Float32}) = UInt32
-fpinttype(::Type{Float16}) = UInt16
-
-# maximum float exponent
-@pure exponent_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T)) - exponent_bias(T)
-# maximum float exponent without bias
-@pure exponent_raw_max{T<:IEEEFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
 # evaluate p[1] + x * (p[2] + x * (....)), i.e. a polynomial via Horner's rule
 # and convert coefficients to same type as x

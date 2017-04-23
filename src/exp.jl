@@ -29,24 +29,22 @@
 #
 # 3. Scale back: exp(x) = 2^k * exp(r)
 
-# coefficients from: lib/msun/src/e_exp.c
 @inline exp_kernel(x::Float64) = @horner(x, 1.66666666666666019037e-1,
         -2.77777777770155933842e-3, 6.61375632143793436117e-5,
         -1.65339022054652515390e-6, 4.13813679705723846039e-8)
 
-# coefficients from: lib/msun/src/e_expf.c
 @inline exp_kernel(x::Float32) = @horner(x, 1.6666625440f-1, -2.7667332906f-3)
 
-# for values smaller than this threshold just use Taylor expansion of 1 + x
-exp_small_thres(::Type{Float64}) = 2.0^-28
-exp_small_thres(::Type{Float32}) = 2.0f0^-13
+# for values smaller than this threshold just use a Taylor expansion
+@eval exp_small_thres(::Type{Float64}) = $(2.0^-28)
+@eval exp_small_thres(::Type{Float32}) = $(2.0f0^-13)
 
 """
     exp(x)
 
 Compute the natural base exponential of `x`, in other words ``e^x``.
 """
-function exp{T<:IEEEFloat}(x::T)
+function exp{T<:Union{Float32,Float64}}(x::T) 
     xa = reinterpret(Unsigned, x) & ~sign_mask(T)
     xsb = signbit(x)
 
@@ -96,13 +94,13 @@ function exp{T<:IEEEFloat}(x::T)
         # scale back
         if k > -significand_bits(T)
             # multiply by 2.0 first to prevent overflow, which helps extends the range
-            k == exponent_max(T) && return y*T(2.0)*T(2.0)^(exponent_max(T) - 1)
+            k == exponent_max(T) && return y * T(2.0) * T(2.0)^(exponent_max(T) - 1)
             twopk = reinterpret(T, rem(exponent_bias(T) + k, fpinttype(T)) << significand_bits(T))
             return y*twopk
         else
             # add significand_bits(T) + 1 to lift the range outside the subnormals
             twopk = reinterpret(T, rem(exponent_bias(T) + significand_bits(T) + 1 + k, fpinttype(T)) << significand_bits(T))
-            return y*twopk*T(2.0)^(-significand_bits(T) - 1)
+            return y * twopk * T(2.0)^(-significand_bits(T) - 1)
         end
     elseif xa < reinterpret(Unsigned, exp_small_thres(T)) # |x| < exp_small_thres
         # Taylor approximation for small x

@@ -1,10 +1,12 @@
+using Base.Math.significand_bits
+
 inttype(::Type{Float64}) = Int64
 inttype(::Type{Float32}) = Int32
 asint{T}(::Type{T}, x) = inttype(T)(x)
 
 function NaNs{T}(::Type{T}, i) # i starts counting from the most significant bit
     i += 1
-    reinterpret(T,(asint(T, Base.exponent_mask(T)) | asint(T,1) << (Base.significand_bits(T) - i))) # most sig bit
+    reinterpret(T,(asint(T, Base.exponent_mask(T)) | asint(T,1) << (significand_bits(T) - i))) # most sig bit
 end
 
 
@@ -39,7 +41,7 @@ end
     @test Amal.ldexp(-realmin(T)/10, typemin(Int64))  === T(-0.0)
     @test Amal.ldexp(T(1.0), typemax(Int64))          === T(Inf)
     @test Amal.ldexp(T(1.0), typemin(Int64))          === T(0.0)
-    @test Amal.ldexp(T(NaN), typemin(Int) + Base.significand_bits(T) - 2) === T(NaN) # c
+    @test Amal.ldexp(T(NaN), typemin(Int) + significand_bits(T) - 2) === T(NaN) # c
 
     # test against reference (should be exactly rounded) 
     @test  Amal.ldexp(realmin(T), -1)      === T(Base.ldexp(big(realmin(T)), -1))

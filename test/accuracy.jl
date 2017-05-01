@@ -3,6 +3,10 @@ denormals(::Type{Float64}) = 2.0.^-(1023.0:1074.0)
 denormals(::Type{Float32}) = 2f0.^-(127f0:149f0)
 
 tol = 5
+T = Float64
+
+    x = rand(2^28).*(Amal.MAXEXP10(T) - Amal.MINEXP10(T)) + Amal.MINEXP10(T)
+    _test_acc(T, Amal.exp10, Base.exp10, x)
 
 @testset "Accuracy (in ulp) for $T" for T in (Float64,Float32)
     println("Accuracy tests for $T")
@@ -15,10 +19,9 @@ tol = 5
     # test_acc(T, Dict(Amal.exp2 => Base.exp2), xx, tol)
     # test_acc(T, Dict(Base.exp2 => Base.exp2), xx, tol)
 
-
-    xx = map(T, vcat(-10:0.00021:10, -35:0.00023:1000, -100:0.001:100))
-    test_acc(T, Dict(Amal.exp10 => Base.exp10), xx, tol)
-    test_acc(T, Dict(Base.exp10 => Base.exp10), xx, tol)
+    # xx = map(T, vcat(-10:0.00021:10, -35:0.00023:1000, -100:0.001:100))
+    # test_acc(T, Dict(Amal.exp10 => Base.exp10), xx, tol)
+    # test_acc(T, Dict(Base.exp10 => Base.exp10), xx, tol)
 
 
     # xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))

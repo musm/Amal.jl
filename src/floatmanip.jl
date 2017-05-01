@@ -9,7 +9,7 @@ julia> ldexp(5., 2)
 20.0
 ```
 """
-function ldexp{T<:IEEEFloat}(x::T, e::Integer)
+function ldexp(x::T, e::Integer) where {T<:IEEEFloat}
     xu = reinterpret(Unsigned, x)
     xs = xu & ~sign_mask(T)
     xs >= exponent_mask(T) && return x # NaN or Inf
@@ -53,30 +53,6 @@ function ldexp{T<:IEEEFloat}(x::T, e::Integer)
 end
 
 """
-    frexp(val)
-
-Return `(x, exp)` such that `x` has a magnitude in the interval ``[1/2, 1)`` or 0, and ``val = x
-\\times 2^{exp}``. In other words, this return the binary significand of `val`, which when
-multiplied by 2 raised to the power `exp` returns `val`.
-"""
-function frexp{T<:IEEEFloat}(x::T)
-    xu = reinterpret(Unsigned, x)
-    xs = xu & ~sign_mask(T)
-    xs >= exponent_mask(T) && return x, 0 # NaN or Inf
-    k = Int(xs >> significand_bits(T))
-    if k == 0 # x is subnormal
-        xs == 0 && return x, 0 # +-0
-        m = leading_zeros(xs) - exponent_bits(T)
-        xs <<= unsigned(m)
-        xu = xs | (xu & sign_mask(T))
-        k = 1 - m
-    end
-    k -= (exponent_bias(T) - 1)
-    xu = (xu & ~exponent_mask(T)) | exponent_half(T)
-    return reinterpret(T, xu), k
-end
-
-"""
     exponent(x) -> Int
 
 Get the exponent of a normalized floating-point number. Returns the integral
@@ -84,13 +60,13 @@ part of the logarithm of `abs(x)`, using base 2 for the logarithm. In other
 words, this computes the binary exponent of `x` such that ``x = significand
 \\times 2^exponent,`` where ``significand \\in [1, 2)``.
 
-Exceptional cases
+# Exceptional cases
 
 * `x = 0`    returns `DomainError()`
 * `x = ±Inf` returns `DomainError()`
 * `x = NaN`  returns `DomainError()`
 """
-function exponent{T<:IEEEFloat}(x::T)
+function exponent(x::T) where {T<:IEEEFloat}
     xs = reinterpret(Unsigned, x) & ~sign_mask(T)
     xs >= exponent_mask(T) && return throw(DomainError()) # NaN or Inf
     k = Int(xs >> significand_bits(T))
@@ -109,14 +85,16 @@ Extract the `significand(s)` (a.k.a. mantissa), in binary representation, of a
 floating-point number. If `x` is a non-zero finite number, then the result will be
 a number of the same type on the interval ``[1,2)``. Otherwise `x` is returned.
 
+# Examples
 ```jldoctest
 julia> significand(15.2)/15.2
 0.125
 
 julia> significand(15.2)*8
 15.2
+```
 """
-function significand{T<:IEEEFloat}(x::T)
+function significand(x::T) where {T<:IEEEFloat}
     xu = reinterpret(Unsigned, x)
     xs = xu & ~sign_mask(T)
     xs >= exponent_mask(T) && return x # NaN or Inf
@@ -128,4 +106,29 @@ function significand{T<:IEEEFloat}(x::T)
     end
     xu = (xu & ~exponent_mask(T)) | exponent_one(T)
     return reinterpret(T, xu)
+end
+
+"""
+    frexp(val)
+
+Return `(x, exp)` such that `x` has a magnitude in the interval ``[1/2, 1)`` or 0,
+and `val` is equal to ``x \\times 2^{exp}``. In other words, this return the
+binary significand of `val`, which when multiplied by `2` raised to the power
+`exp` returns `val`.
+"""
+function frexp(x::T) where {T<:IEEEFloat}
+    xu = reinterpret(Unsigned, x)
+    xs = xu & ~sign_mask(T)
+    xs >= exponent_mask(T) && return x, 0 # NaN or Inf
+    k = Int(xs >> significand_bits(T))
+    if k == 0 # x is subnormal
+        xs == 0 && return x, 0 # +-0
+        m = leading_zeros(xs) - exponent_bits(T)
+        xs <<= unsigned(m)
+        xu = xs | (xu & sign_mask(T))
+        k = 1 - m
+    end
+    k -= (exponent_bias(T) - 1)
+    xu = (xu & ~exponent_mask(T)) | exponent_half(T)
+    return reinterpret(T, xu), k
 end

@@ -56,13 +56,13 @@ function exp2{T<:IEEEFloat}(x::T)
     xsb = Int(xu >> Unsigned(8*sizeof(T)-1))
 
     # filter out non-finite arguments
-    if xs > reinterpret(Unsigned, MAXEXP2(T))
+    if xs > reinterpret(Unsigned, EXP2_MAX(T))
         if xs >= exponent_mask(T)
             xs & significand_mask(T) != 0 && return T(NaN)
             return xsb == 0 ? T(Inf) : T(0.0) # exp2(+-Inf)
         end
-        x > MAXEXP2(T) && return T(Inf)
-        x < MINEXP2(T) && return T(0.0)
+        x > EXP2_MAX(T) && return T(Inf)
+        x < EXP2_MIN(T) && return T(0.0)
     end
 
     # argument reduction

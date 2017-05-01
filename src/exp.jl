@@ -43,21 +43,25 @@
     exp(x)
 
 Compute the natural base exponential of `x`, in other words ``e^x``.
+
+```jldoctest
+julia> exp(1.0)
+2.718281828459045
+```
 """
-function exp{T<:Union{Float32,Float64}}(x::T) 
+function exp(x::T) where {T<:Union{Float32,Float64}}
     xa = reinterpret(Unsigned, x) & ~sign_mask(T)
     xsb = signbit(x)
 
     # filter out non-finite arguments
-    if xa > reinterpret(Unsigned, MAXEXP(T))
+    if xa > reinterpret(Unsigned, EXP_MAX(T))
         if xa >= exponent_mask(T)
             xa & significand_mask(T) != 0 && return T(NaN)
             return xsb ? T(0.0) : T(Inf) # exp(+-Inf)
         end
-        x > MAXEXP(T) && return T(Inf)
-        x < MINEXP(T) && return T(0.0)
+        x > EXP_MAX(T) && return T(Inf)
+        x < EXP_MIN(T) && return T(0.0)
     end
-
     # This implementation gives 2.7182818284590455 for exp(1.0) when T ==
     # Float64, which is well within the allowable error; however,
     # 2.718281828459045 is closer to the true value so we prefer that answer,
@@ -65,7 +69,7 @@ function exp{T<:Union{Float32,Float64}}(x::T)
     if x == T(1.0) && T == Float64
         return 2.718281828459045235360
     end
-
+    # compute approximation
     if xa > reinterpret(Unsigned, T(0.5)*T(LN2)) # |x| > 0.5 log(2)
         # argument reduction
         if xa < reinterpret(Unsigned, T(1.5)*T(LN2)) # |x| < 1.5 log(2)
@@ -79,18 +83,16 @@ function exp{T<:Union{Float32,Float64}}(x::T)
                 lo = LN2L(T)
             end
         else
-            n = round(T(LOG2E)*x)
+            n = round(T(LOG2_E)*x)
             k = unsafe_trunc(Int,n)
             hi = muladd(n, -LN2U(T), x)
             lo = n*LN2L(T)
         end
-        r = hi - lo
-
         # compute approximation on reduced argument
+        r = hi - lo
         z = r*r
         p = r - z*exp_kernel(z)
         y = T(1.0) - ((lo - (r*p)/(T(2.0) - p)) - hi)
-
         # scale back
         if k > -significand_bits(T)
             # multiply by 2.0 first to prevent overflow, which helps extends the range
@@ -103,7 +105,7 @@ function exp{T<:Union{Float32,Float64}}(x::T)
             return y * twopk * T(2.0)^(-significand_bits(T) - 1)
         end
     elseif xa < reinterpret(Unsigned, exp_small_thres(T)) # |x| < exp_small_thres
-        # Taylor approximation for small x
+        # Taylor approximation for small values: exp(x) ≈ 1.0 + x
         return T(1.0) + x
     else
         # primary range with k = 0, so compute approximation directly

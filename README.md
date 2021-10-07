@@ -1,7 +1,12 @@
+**This package is more or less superseded by the SLEEF.jl package and the Julia math module itself, as many libm implementations have now been converted to pure Julia in the core library**
+
 <div align="center"><img src="https://cloud.githubusercontent.com/assets/4319522/19199051/1ecffc38-8c90-11e6-8617-19208b61a07b.jpg" alt="Amal"></img> </div>
 
 
 Amal, a pure Julia math library *(work in progress)*
+
+
+
 
 [![Travis Build Status](https://travis-ci.org/musm/Amal.jl.svg?branch=master)](https://travis-ci.org/musm/Amal.jl)
 [![Appveyor Build status](https://ci.appveyor.com/api/projects/status/9eh7v6a7rm0ju0p3/branch/master?svg=true)](https://ci.appveyor.com/project/musm/amal-jl-9l512/branch/master)
